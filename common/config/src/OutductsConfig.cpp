@@ -26,7 +26,7 @@ static constexpr hdtn::Logger::SubProcess subprocess = hdtn::Logger::SubProcess:
 
 static const std::vector<std::string> VALID_CONVERGENCE_LAYER_NAMES = {
     "ltp_over_udp", "ltp_over_ipc", "ltp_over_encap_local_stream", "bp_over_encap_local_stream",
-    "udp", "stcp", "tcpcl_v3", "tcpcl_v4", "slip_over_uart"
+    "udp", "stcp", "tcpcl_v3", "tcpcl_v4", "slip_over_uart", "rama"
 };
 
 static const uint64_t DEFAULT_RATE_LIMIT_PRECISION = 100000;
@@ -57,13 +57,15 @@ outduct_element_config_t::outduct_element_config_t() :
     ltpMaxUdpPacketsToSendPerSystemCall(0),
     ltpSenderPingSecondsOrZeroToDisable(0),
     delaySendingOfDataSegmentsTimeMsOrZeroToDisable(20),
-    keepActiveSessionDataOnDisk(false),
-    activeSessionDataOnDiskNewFileDurationMs(2000),
-    activeSessionDataOnDiskDirectory("./"),
-    rateLimitPrecisionMicroSec(DEFAULT_RATE_LIMIT_PRECISION),
+      keepActiveSessionDataOnDisk(false),
+      activeSessionDataOnDiskNewFileDurationMs(2000),
+      activeSessionDataOnDiskDirectory("./"),
+      rateLimitPrecisionMicroSec(DEFAULT_RATE_LIMIT_PRECISION),
 
-    comPort(""),
-    baudRate(115200),
+      ramaHeaderByte(0xA0),
+
+      comPort(""),
+      baudRate(115200),
 
     keepAliveIntervalSeconds(0),
     tcpclV3MyMaxTxSegmentSizeBytes(0),
@@ -107,13 +109,15 @@ outduct_element_config_t::outduct_element_config_t(const outduct_element_config_
     ltpMaxUdpPacketsToSendPerSystemCall(o.ltpMaxUdpPacketsToSendPerSystemCall),
     ltpSenderPingSecondsOrZeroToDisable(o.ltpSenderPingSecondsOrZeroToDisable),
     delaySendingOfDataSegmentsTimeMsOrZeroToDisable(o.delaySendingOfDataSegmentsTimeMsOrZeroToDisable),
-    keepActiveSessionDataOnDisk(o.keepActiveSessionDataOnDisk),
-    activeSessionDataOnDiskNewFileDurationMs(o.activeSessionDataOnDiskNewFileDurationMs),
-    activeSessionDataOnDiskDirectory(o.activeSessionDataOnDiskDirectory),
-    rateLimitPrecisionMicroSec(o.rateLimitPrecisionMicroSec),
+      keepActiveSessionDataOnDisk(o.keepActiveSessionDataOnDisk),
+      activeSessionDataOnDiskNewFileDurationMs(o.activeSessionDataOnDiskNewFileDurationMs),
+      activeSessionDataOnDiskDirectory(o.activeSessionDataOnDiskDirectory),
+      rateLimitPrecisionMicroSec(o.rateLimitPrecisionMicroSec),
 
-    comPort(o.comPort),
-    baudRate(o.baudRate),
+      ramaHeaderByte(o.ramaHeaderByte),
+
+      comPort(o.comPort),
+      baudRate(o.baudRate),
 
     keepAliveIntervalSeconds(o.keepAliveIntervalSeconds),
     tcpclV3MyMaxTxSegmentSizeBytes(o.tcpclV3MyMaxTxSegmentSizeBytes),
@@ -154,13 +158,15 @@ outduct_element_config_t::outduct_element_config_t(outduct_element_config_t&& o)
     ltpMaxUdpPacketsToSendPerSystemCall(o.ltpMaxUdpPacketsToSendPerSystemCall),
     ltpSenderPingSecondsOrZeroToDisable(o.ltpSenderPingSecondsOrZeroToDisable),
     delaySendingOfDataSegmentsTimeMsOrZeroToDisable(o.delaySendingOfDataSegmentsTimeMsOrZeroToDisable),
-    keepActiveSessionDataOnDisk(o.keepActiveSessionDataOnDisk),
-    activeSessionDataOnDiskNewFileDurationMs(o.activeSessionDataOnDiskNewFileDurationMs),
-    activeSessionDataOnDiskDirectory(std::move(o.activeSessionDataOnDiskDirectory)),
-    rateLimitPrecisionMicroSec(o.rateLimitPrecisionMicroSec),
+      keepActiveSessionDataOnDisk(o.keepActiveSessionDataOnDisk),
+      activeSessionDataOnDiskNewFileDurationMs(o.activeSessionDataOnDiskNewFileDurationMs),
+      activeSessionDataOnDiskDirectory(std::move(o.activeSessionDataOnDiskDirectory)),
+      rateLimitPrecisionMicroSec(o.rateLimitPrecisionMicroSec),
 
-    comPort(std::move(o.comPort)),
-    baudRate(o.baudRate),
+      ramaHeaderByte(o.ramaHeaderByte),
+
+      comPort(std::move(o.comPort)),
+      baudRate(o.baudRate),
 
     keepAliveIntervalSeconds(o.keepAliveIntervalSeconds),
     tcpclV3MyMaxTxSegmentSizeBytes(o.tcpclV3MyMaxTxSegmentSizeBytes),
@@ -203,11 +209,13 @@ outduct_element_config_t& outduct_element_config_t::operator=(const outduct_elem
     delaySendingOfDataSegmentsTimeMsOrZeroToDisable = o.delaySendingOfDataSegmentsTimeMsOrZeroToDisable;
     keepActiveSessionDataOnDisk = o.keepActiveSessionDataOnDisk;
     activeSessionDataOnDiskNewFileDurationMs = o.activeSessionDataOnDiskNewFileDurationMs;
-    activeSessionDataOnDiskDirectory = o.activeSessionDataOnDiskDirectory;
-    rateLimitPrecisionMicroSec = o.rateLimitPrecisionMicroSec;
+      activeSessionDataOnDiskDirectory = o.activeSessionDataOnDiskDirectory;
+      rateLimitPrecisionMicroSec = o.rateLimitPrecisionMicroSec;
 
-    comPort = o.comPort;
-    baudRate = o.baudRate;
+      ramaHeaderByte = o.ramaHeaderByte;
+
+      comPort = o.comPort;
+      baudRate = o.baudRate;
 
     keepAliveIntervalSeconds = o.keepAliveIntervalSeconds;
 
@@ -253,11 +261,13 @@ outduct_element_config_t& outduct_element_config_t::operator=(outduct_element_co
     delaySendingOfDataSegmentsTimeMsOrZeroToDisable = o.delaySendingOfDataSegmentsTimeMsOrZeroToDisable;
     keepActiveSessionDataOnDisk = o.keepActiveSessionDataOnDisk;
     activeSessionDataOnDiskNewFileDurationMs = o.activeSessionDataOnDiskNewFileDurationMs;
-    activeSessionDataOnDiskDirectory = std::move(o.activeSessionDataOnDiskDirectory);
-    rateLimitPrecisionMicroSec = o.rateLimitPrecisionMicroSec;
+      activeSessionDataOnDiskDirectory = std::move(o.activeSessionDataOnDiskDirectory);
+      rateLimitPrecisionMicroSec = o.rateLimitPrecisionMicroSec;
 
-    comPort = std::move(o.comPort);
-    baudRate = o.baudRate;
+      ramaHeaderByte = o.ramaHeaderByte;
+
+      comPort = std::move(o.comPort);
+      baudRate = o.baudRate;
 
     keepAliveIntervalSeconds = o.keepAliveIntervalSeconds;
 
@@ -302,11 +312,13 @@ bool outduct_element_config_t::operator==(const outduct_element_config_t & o) co
         (delaySendingOfDataSegmentsTimeMsOrZeroToDisable == o.delaySendingOfDataSegmentsTimeMsOrZeroToDisable) &&
         (keepActiveSessionDataOnDisk == o.keepActiveSessionDataOnDisk) &&
         (activeSessionDataOnDiskNewFileDurationMs == o.activeSessionDataOnDiskNewFileDurationMs) &&
-        (activeSessionDataOnDiskDirectory == o.activeSessionDataOnDiskDirectory) &&
-        (rateLimitPrecisionMicroSec == o.rateLimitPrecisionMicroSec) &&
+          (activeSessionDataOnDiskDirectory == o.activeSessionDataOnDiskDirectory) &&
+          (rateLimitPrecisionMicroSec == o.rateLimitPrecisionMicroSec) &&
 
-        (comPort == o.comPort) &&
-        (baudRate == o.baudRate) &&
+          (ramaHeaderByte == o.ramaHeaderByte) &&
+
+          (comPort == o.comPort) &&
+          (baudRate == o.baudRate) &&
 
         (keepAliveIntervalSeconds == o.keepAliveIntervalSeconds) &&
         
@@ -401,8 +413,17 @@ bool OutductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree
                     return false;
                 }
             }
-            outductElementConfig.maxNumberOfBundlesInPipeline = outductElementConfigPt.second.get<uint32_t>("maxNumberOfBundlesInPipeline");
-            outductElementConfig.maxSumOfBundleBytesInPipeline = outductElementConfigPt.second.get<uint64_t>("maxSumOfBundleBytesInPipeline");
+              outductElementConfig.maxNumberOfBundlesInPipeline = outductElementConfigPt.second.get<uint32_t>("maxNumberOfBundlesInPipeline");
+              outductElementConfig.maxSumOfBundleBytesInPipeline = outductElementConfigPt.second.get<uint64_t>("maxSumOfBundleBytesInPipeline");
+
+              if (outductElementConfig.convergenceLayer == "rama") {
+                  outductElementConfig.ramaHeaderByte = static_cast<uint8_t>(outductElementConfigPt.second.get<uint16_t>("ramaHeaderByte"));
+              }
+              else if (outductElementConfigPt.second.count("ramaHeaderByte") != 0) {
+                  LOG_ERROR(subprocess) << "error parsing JSON outductVector[" << (vectorIndex - 1) << "]: outduct convergence layer  "
+                      << outductElementConfig.convergenceLayer << " has a rama outduct only configuration parameter of \"ramaHeaderByte\".. please remove";
+                  return false;
+              }
 
             if ((outductElementConfig.convergenceLayer == "ltp_over_udp")
                 || (outductElementConfig.convergenceLayer == "ltp_over_ipc")
@@ -464,7 +485,7 @@ bool OutductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree
                 }
             }
 
-            if (outductElementConfig.convergenceLayer == "ltp_over_udp" || outductElementConfig.convergenceLayer == "udp") {
+              if (outductElementConfig.convergenceLayer == "ltp_over_udp" || outductElementConfig.convergenceLayer == "udp" || outductElementConfig.convergenceLayer == "rama") {
                 outductElementConfig.rateLimitPrecisionMicroSec = outductElementConfigPt.second.get<uint64_t>("rateLimitPrecisionMicroSec", DEFAULT_RATE_LIMIT_PRECISION);
                 if (outductElementConfig.rateLimitPrecisionMicroSec == 0) {
                     LOG_ERROR(subprocess) << "error parsing JSON outductVector[" << (vectorIndex - 1) << "]: rateLimitPrecisionMicroSec " <<
@@ -472,7 +493,7 @@ bool OutductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree
                         return false;
                 }
             }
-            else if (outductElementConfigPt.second.count("rateLimitPrecisionMicroSec")) {
+              else if (outductElementConfigPt.second.count("rateLimitPrecisionMicroSec")) {
                 LOG_ERROR(subprocess) << "error parsing JSON outductVector[" << (vectorIndex - 1) << "]: outduct convergence layer  " << outductElementConfig.convergenceLayer
                     << " has an ltp/udp outduct only configuration parameter of rateLimitPrecisionMicroSec .. please remove";
                 return false;
@@ -622,7 +643,11 @@ boost::property_tree::ptree OutductsConfig::GetNewPropertyTree() const {
             outductElementConfigPt.put("remotePort", outductElementConfig.remotePort);
         }
         outductElementConfigPt.put("maxNumberOfBundlesInPipeline", outductElementConfig.maxNumberOfBundlesInPipeline);
-        outductElementConfigPt.put("maxSumOfBundleBytesInPipeline", outductElementConfig.maxSumOfBundleBytesInPipeline);
+          outductElementConfigPt.put("maxSumOfBundleBytesInPipeline", outductElementConfig.maxSumOfBundleBytesInPipeline);
+
+          if (outductElementConfig.convergenceLayer == "rama") {
+              outductElementConfigPt.put("ramaHeaderByte", outductElementConfig.ramaHeaderByte);
+          }
         
         if ((outductElementConfig.convergenceLayer == "ltp_over_udp")
             || (outductElementConfig.convergenceLayer == "ltp_over_ipc")
@@ -653,7 +678,7 @@ boost::property_tree::ptree OutductsConfig::GetNewPropertyTree() const {
             outductElementConfigPt.put("activeSessionDataOnDiskNewFileDurationMs", outductElementConfig.activeSessionDataOnDiskNewFileDurationMs);
             outductElementConfigPt.put("activeSessionDataOnDiskDirectory", outductElementConfig.activeSessionDataOnDiskDirectory.string()); //.string() prevents nested quotes in json file
         }
-        if ((outductElementConfig.convergenceLayer == "ltp_over_udp") || (outductElementConfig.convergenceLayer == "udp")) {
+          if ((outductElementConfig.convergenceLayer == "ltp_over_udp") || (outductElementConfig.convergenceLayer == "udp") || (outductElementConfig.convergenceLayer == "rama")) {
             outductElementConfigPt.put("rateLimitPrecisionMicroSec", outductElementConfig.rateLimitPrecisionMicroSec);
         }
         if (outductElementConfig.convergenceLayer == "bp_over_encap_local_stream") {

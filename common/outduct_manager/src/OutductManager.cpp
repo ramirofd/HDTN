@@ -20,6 +20,7 @@
 #include "TcpclV4Outduct.h"
 #include "StcpOutduct.h"
 #include "UdpOutduct.h"
+#include "RamaOutduct.h"
 #include "LtpOverUdpOutduct.h"
 #include "LtpOverIpcOutduct.h"
 #include "LtpOverEncapLocalStreamOutduct.h"
@@ -105,6 +106,9 @@ bool OutductManager::LoadOutductsFromConfig(const OutductsConfig & outductsConfi
         }
         else if (thisOutductConfig.convergenceLayer == "udp") {
             outductSharedPtr = std::make_shared<UdpOutduct>(thisOutductConfig, uuidIndex);
+        }
+        else if (thisOutductConfig.convergenceLayer == "rama") {
+            outductSharedPtr = std::make_shared<RamaOutduct>(thisOutductConfig, uuidIndex);
         }
         else if (thisOutductConfig.convergenceLayer == "ltp_over_udp") {
             outductSharedPtr = std::make_shared<LtpOverUdpOutduct>(thisOutductConfig, uuidIndex);
