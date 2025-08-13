@@ -20,6 +20,7 @@
 #include "TcpclV4Induct.h"
 #include "StcpInduct.h"
 #include "UdpInduct.h"
+#include "RamaInduct.h"
 #include "LtpOverUdpInduct.h"
 #include "LtpOverIpcInduct.h"
 #include "LtpOverEncapLocalStreamInduct.h"
@@ -68,6 +69,9 @@ bool InductManager::LoadInductsFromConfig(const InductProcessBundleCallback_t & 
         }
         else if (thisInductConfig.convergenceLayer == "udp") {
             m_inductsList.emplace_back(boost::make_unique<UdpInduct>(inductProcessBundleCallback, thisInductConfig));
+        }
+        else if (thisInductConfig.convergenceLayer == "rama") {
+            m_inductsList.emplace_back(boost::make_unique<RamaInduct>(inductProcessBundleCallback, thisInductConfig));
         }
         else if (thisInductConfig.convergenceLayer == "ltp_over_udp") {
             m_inductsList.emplace_back(boost::make_unique<LtpOverUdpInduct>(inductProcessBundleCallback, thisInductConfig, maxBundleSizeBytes));

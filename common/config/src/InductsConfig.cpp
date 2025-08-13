@@ -25,17 +25,19 @@ static constexpr hdtn::Logger::SubProcess subprocess = hdtn::Logger::SubProcess:
 
 static const std::vector<std::string> VALID_CONVERGENCE_LAYER_NAMES = {
     "ltp_over_udp", "ltp_over_ipc", "ltp_over_encap_local_stream", "bp_over_encap_local_stream",
-    "udp", "stcp", "tcpcl_v3", "tcpcl_v4", "slip_over_uart"
+    "udp", "stcp", "tcpcl_v3", "tcpcl_v4", "slip_over_uart", "rama"
 };
 
 induct_element_config_t::induct_element_config_t() :
     name(""),
     convergenceLayer(""),
     boundPort(0),
-    numRxCircularBufferElements(0),
-    numRxCircularBufferBytesPerElement(0),
+      numRxCircularBufferElements(0),
+      numRxCircularBufferBytesPerElement(0),
 
-    bpEncapLocalSocketOrPipePath(""),
+      ramaHeaderByte(0xA0),
+
+      bpEncapLocalSocketOrPipePath(""),
 
     thisLtpEngineId(0),
     remoteLtpEngineId(0),
@@ -80,10 +82,12 @@ induct_element_config_t::induct_element_config_t(const induct_element_config_t& 
     name(o.name),
     convergenceLayer(o.convergenceLayer),
     boundPort(o.boundPort),
-    numRxCircularBufferElements(o.numRxCircularBufferElements),
-    numRxCircularBufferBytesPerElement(o.numRxCircularBufferBytesPerElement),
+      numRxCircularBufferElements(o.numRxCircularBufferElements),
+      numRxCircularBufferBytesPerElement(o.numRxCircularBufferBytesPerElement),
 
-    bpEncapLocalSocketOrPipePath(o.bpEncapLocalSocketOrPipePath),
+      ramaHeaderByte(o.ramaHeaderByte),
+
+      bpEncapLocalSocketOrPipePath(o.bpEncapLocalSocketOrPipePath),
 
     thisLtpEngineId(o.thisLtpEngineId),
     remoteLtpEngineId(o.remoteLtpEngineId),
@@ -125,10 +129,12 @@ induct_element_config_t::induct_element_config_t(induct_element_config_t&& o) no
     name(std::move(o.name)),
     convergenceLayer(std::move(o.convergenceLayer)),
     boundPort(o.boundPort),
-    numRxCircularBufferElements(o.numRxCircularBufferElements),
-    numRxCircularBufferBytesPerElement(o.numRxCircularBufferBytesPerElement),
+      numRxCircularBufferElements(o.numRxCircularBufferElements),
+      numRxCircularBufferBytesPerElement(o.numRxCircularBufferBytesPerElement),
 
-    bpEncapLocalSocketOrPipePath(std::move(o.bpEncapLocalSocketOrPipePath)),
+      ramaHeaderByte(o.ramaHeaderByte),
+
+      bpEncapLocalSocketOrPipePath(std::move(o.bpEncapLocalSocketOrPipePath)),
 
     thisLtpEngineId(o.thisLtpEngineId),
     remoteLtpEngineId(o.remoteLtpEngineId),
@@ -171,9 +177,11 @@ induct_element_config_t& induct_element_config_t::operator=(const induct_element
     convergenceLayer = o.convergenceLayer;
     boundPort = o.boundPort;
     numRxCircularBufferElements = o.numRxCircularBufferElements;
-    numRxCircularBufferBytesPerElement = o.numRxCircularBufferBytesPerElement;
+      numRxCircularBufferBytesPerElement = o.numRxCircularBufferBytesPerElement;
 
-    bpEncapLocalSocketOrPipePath = o.bpEncapLocalSocketOrPipePath;
+      ramaHeaderByte = o.ramaHeaderByte;
+
+      bpEncapLocalSocketOrPipePath = o.bpEncapLocalSocketOrPipePath;
 
     thisLtpEngineId = o.thisLtpEngineId;
     remoteLtpEngineId = o.remoteLtpEngineId;
@@ -218,9 +226,11 @@ induct_element_config_t& induct_element_config_t::operator=(induct_element_confi
     convergenceLayer = std::move(o.convergenceLayer);
     boundPort = o.boundPort;
     numRxCircularBufferElements = o.numRxCircularBufferElements;
-    numRxCircularBufferBytesPerElement = o.numRxCircularBufferBytesPerElement;
+      numRxCircularBufferBytesPerElement = o.numRxCircularBufferBytesPerElement;
 
-    bpEncapLocalSocketOrPipePath = std::move(o.bpEncapLocalSocketOrPipePath);
+      ramaHeaderByte = o.ramaHeaderByte;
+
+      bpEncapLocalSocketOrPipePath = std::move(o.bpEncapLocalSocketOrPipePath);
 
     thisLtpEngineId = o.thisLtpEngineId;
     remoteLtpEngineId = o.remoteLtpEngineId;
@@ -262,11 +272,13 @@ induct_element_config_t& induct_element_config_t::operator=(induct_element_confi
 bool induct_element_config_t::operator==(const induct_element_config_t & o) const {
     return (name == o.name) &&
         (convergenceLayer == o.convergenceLayer) &&
-        (boundPort == o.boundPort) &&
-        (numRxCircularBufferElements == o.numRxCircularBufferElements) &&
-        (numRxCircularBufferBytesPerElement == o.numRxCircularBufferBytesPerElement) &&
+          (boundPort == o.boundPort) &&
+          (numRxCircularBufferElements == o.numRxCircularBufferElements) &&
+          (numRxCircularBufferBytesPerElement == o.numRxCircularBufferBytesPerElement) &&
 
-        (bpEncapLocalSocketOrPipePath == o.bpEncapLocalSocketOrPipePath) &&
+          (ramaHeaderByte == o.ramaHeaderByte) &&
+
+          (bpEncapLocalSocketOrPipePath == o.bpEncapLocalSocketOrPipePath) &&
 
         (thisLtpEngineId == o.thisLtpEngineId) &&
         (remoteLtpEngineId == o.remoteLtpEngineId) &&
@@ -382,14 +394,23 @@ bool InductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree 
             { //no cb, relies on buffering from the local socket or pipe
                 inductElementConfig.numRxCircularBufferElements = inductElementConfigPt.second.get<uint32_t>("numRxCircularBufferElements");
             }
-            if ((inductElementConfig.convergenceLayer == "udp") || (inductElementConfig.convergenceLayer == "tcpcl_v3") || (inductElementConfig.convergenceLayer == "tcpcl_v4")) {
-                inductElementConfig.numRxCircularBufferBytesPerElement = inductElementConfigPt.second.get<uint32_t>("numRxCircularBufferBytesPerElement");
-            }
-            else if (inductElementConfigPt.second.count("numRxCircularBufferBytesPerElement")) { //not used by stcp or ltp
-                LOG_ERROR(subprocess) << "error parsing JSON inductVector[" << (vectorIndex - 1) << "]: convergence layer "
-                    << inductElementConfig.convergenceLayer << " induct config does not use numRxCircularBufferBytesPerElement.. please remove";
-                return false;
-            }
+              if ((inductElementConfig.convergenceLayer == "udp") || (inductElementConfig.convergenceLayer == "tcpcl_v3") || (inductElementConfig.convergenceLayer == "tcpcl_v4") || (inductElementConfig.convergenceLayer == "rama")) {
+                  inductElementConfig.numRxCircularBufferBytesPerElement = inductElementConfigPt.second.get<uint32_t>("numRxCircularBufferBytesPerElement");
+              }
+              else if (inductElementConfigPt.second.count("numRxCircularBufferBytesPerElement")) { //not used by stcp or ltp
+                  LOG_ERROR(subprocess) << "error parsing JSON inductVector[" << (vectorIndex - 1) << "]: convergence layer "
+                      << inductElementConfig.convergenceLayer << " induct config does not use numRxCircularBufferBytesPerElement.. please remove";
+                  return false;
+              }
+
+              if (inductElementConfig.convergenceLayer == "rama") {
+                  inductElementConfig.ramaHeaderByte = static_cast<uint8_t>(inductElementConfigPt.second.get<uint16_t>("ramaHeaderByte"));
+              }
+              else if (inductElementConfigPt.second.count("ramaHeaderByte") != 0) {
+                  LOG_ERROR(subprocess) << "error parsing JSON inductVector[" << (vectorIndex - 1) << "]: induct convergence layer  "
+                      << inductElementConfig.convergenceLayer << " has a rama induct only configuration parameter of \"ramaHeaderByte\".. please remove";
+                  return false;
+              }
 
             if ((inductElementConfig.convergenceLayer == "ltp_over_udp")
                 || (inductElementConfig.convergenceLayer == "ltp_over_ipc")
@@ -604,8 +625,11 @@ boost::property_tree::ptree InductsConfig::GetNewPropertyTree() const {
         { //no cb, relies on buffering from the local socket or pipe
             inductElementConfigPt.put("numRxCircularBufferElements", inductElementConfig.numRxCircularBufferElements);
         }
-        if ((inductElementConfig.convergenceLayer == "udp") || (inductElementConfig.convergenceLayer == "tcpcl_v3") || (inductElementConfig.convergenceLayer == "tcpcl_v4")) {
+        if ((inductElementConfig.convergenceLayer == "udp") || (inductElementConfig.convergenceLayer == "tcpcl_v3") || (inductElementConfig.convergenceLayer == "tcpcl_v4") || (inductElementConfig.convergenceLayer == "rama")) {
             inductElementConfigPt.put("numRxCircularBufferBytesPerElement", inductElementConfig.numRxCircularBufferBytesPerElement);
+        }
+        if (inductElementConfig.convergenceLayer == "rama") {
+            inductElementConfigPt.put("ramaHeaderByte", inductElementConfig.ramaHeaderByte);
         }
         if ((inductElementConfig.convergenceLayer == "ltp_over_udp")
             || (inductElementConfig.convergenceLayer == "ltp_over_ipc")

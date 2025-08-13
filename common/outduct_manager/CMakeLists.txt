@@ -2,9 +2,10 @@ add_library(outduct_manager_lib
 	src/Outduct.cpp
 	src/TcpclOutduct.cpp
 	src/TcpclV4Outduct.cpp
-	src/StcpOutduct.cpp
+        src/StcpOutduct.cpp
     src/UdpOutduct.cpp
-	src/LtpOutduct.cpp
+        src/RamaOutduct.cpp
+        src/LtpOutduct.cpp
 	src/LtpOverEncapLocalStreamOutduct.cpp
 	src/LtpOverIpcOutduct.cpp
 	src/LtpOverUdpOutduct.cpp
@@ -24,12 +25,13 @@ set(MY_PUBLIC_HEADERS
     include/LtpOverUdpOutduct.h
 	include/LtpOutduct.h
 	include/Outduct.h
-	include/OutductManager.h
-	include/StcpOutduct.h
-	include/TcpclOutduct.h
-	include/TcpclV4Outduct.h
-	include/UdpOutduct.h
-	include/SlipOverUartOutduct.h
+        include/OutductManager.h
+        include/StcpOutduct.h
+        include/TcpclOutduct.h
+        include/TcpclV4Outduct.h
+        include/UdpOutduct.h
+        include/RamaOutduct.h
+        include/SlipOverUartOutduct.h
 	include/BpOverEncapLocalStreamOutduct.h
 	${CMAKE_CURRENT_BINARY_DIR}/outduct_manager_lib_export.h
 )

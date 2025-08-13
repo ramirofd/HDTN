@@ -1,0 +1,13 @@
+{
+    "inductConfigName": "myconfig",
+    "inductVector": [
+        {
+            "name": "rama_bpsink",
+            "convergenceLayer": "rama",
+            "boundPort": 4558,
+            "numRxCircularBufferElements": 2000,
+            "numRxCircularBufferBytesPerElement": 65535,
+            "ramaHeaderByte": 161
+        }
+    ]
+}
