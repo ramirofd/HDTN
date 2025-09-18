@@ -40,8 +40,8 @@ struct induct_element_config_t {
     uint32_t numRxCircularBufferElements;
     uint32_t numRxCircularBufferBytesPerElement;
 
-    //specific to rama
-    uint8_t ramaHeaderByte;
+    //specific to hilink
+    uint8_t hilinkHeaderByte;
 
     //specific to bp over encap
     std::string bpEncapLocalSocketOrPipePath;

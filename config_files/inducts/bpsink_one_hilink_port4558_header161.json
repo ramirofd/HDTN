@@ -2,12 +2,12 @@
     "inductConfigName": "myconfig",
     "inductVector": [
         {
-            "name": "rama_bpsink",
-            "convergenceLayer": "rama",
+            "name": "hilink_bpsink",
+            "convergenceLayer": "hilink",
             "boundPort": 4558,
             "numRxCircularBufferElements": 2000,
             "numRxCircularBufferBytesPerElement": 65535,
-            "ramaHeaderByte": 161
+            "hilinkHeaderByte": 161
         }
     ]
 }
