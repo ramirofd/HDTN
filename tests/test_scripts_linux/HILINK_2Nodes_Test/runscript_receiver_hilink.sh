@@ -2,8 +2,8 @@
 
 # path variables
 config_files=$HDTN_SOURCE_ROOT/config_files
-hdtn_config=$config_files/hdtn/hdtn_Node2_rama.json
-sink_config=$config_files/inducts/bpsink_one_rama_port4558_header161.json
+hdtn_config=$config_files/hdtn/hdtn_Node2_hilink.json
+sink_config=$config_files/inducts/bpsink_one_hilink_port4558_header161.json
 
 cd $HDTN_SOURCE_ROOT
 

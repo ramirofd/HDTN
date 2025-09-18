@@ -1,5 +1,5 @@
-# Rama_2Nodes_Test
-* Prueba la capacidad de conexión usando la capa de convergencia Rama dentro del protocolo HDTN.
+# HILINK_2Nodes_Test
+* Prueba la capacidad de conexión usando la capa de convergencia HILINK dentro del protocolo HDTN.
 
 ## Compilación de HDTN
 1. `export HDTN_SOURCE_ROOT=/ruta/a/HDTN`
@@ -11,8 +11,8 @@
 7. `make install`
 
 ## Cómo usar
-* Dentro del contenedor "receptor", ejecutar `./runscript_receiver_rama.sh`
+* Dentro del contenedor "receptor", ejecutar `./runscript_receiver_hilink.sh`
 * Esperar aproximadamente 3 segundos
-* Dentro del contenedor "emisor", ejecutar `./runscript_sender_rama.sh`
+* Dentro del contenedor "emisor", ejecutar `./runscript_sender_hilink.sh`
 * Esperar aproximadamente 10 segundos para que los programas se inicialicen y operen
 * Puede utilizar `tcpdump` para observar el tráfico de red en cualquiera de los contenedores o en la máquina anfitriona

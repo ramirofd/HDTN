@@ -26,7 +26,7 @@ static constexpr hdtn::Logger::SubProcess subprocess = hdtn::Logger::SubProcess:
 
 static const std::vector<std::string> VALID_CONVERGENCE_LAYER_NAMES = {
     "ltp_over_udp", "ltp_over_ipc", "ltp_over_encap_local_stream", "bp_over_encap_local_stream",
-    "udp", "stcp", "tcpcl_v3", "tcpcl_v4", "slip_over_uart", "rama"
+    "udp", "stcp", "tcpcl_v3", "tcpcl_v4", "slip_over_uart", "hilink"
 };
 
 static const uint64_t DEFAULT_RATE_LIMIT_PRECISION = 100000;
@@ -62,7 +62,7 @@ outduct_element_config_t::outduct_element_config_t() :
       activeSessionDataOnDiskDirectory("./"),
       rateLimitPrecisionMicroSec(DEFAULT_RATE_LIMIT_PRECISION),
 
-      ramaHeaderByte(0xA0),
+      hilinkHeaderByte(0xA0),
 
       comPort(""),
       baudRate(115200),
@@ -114,7 +114,7 @@ outduct_element_config_t::outduct_element_config_t(const outduct_element_config_
       activeSessionDataOnDiskDirectory(o.activeSessionDataOnDiskDirectory),
       rateLimitPrecisionMicroSec(o.rateLimitPrecisionMicroSec),
 
-      ramaHeaderByte(o.ramaHeaderByte),
+      hilinkHeaderByte(o.hilinkHeaderByte),
 
       comPort(o.comPort),
       baudRate(o.baudRate),
@@ -163,7 +163,7 @@ outduct_element_config_t::outduct_element_config_t(outduct_element_config_t&& o)
       activeSessionDataOnDiskDirectory(std::move(o.activeSessionDataOnDiskDirectory)),
       rateLimitPrecisionMicroSec(o.rateLimitPrecisionMicroSec),
 
-      ramaHeaderByte(o.ramaHeaderByte),
+      hilinkHeaderByte(o.hilinkHeaderByte),
 
       comPort(std::move(o.comPort)),
       baudRate(o.baudRate),
@@ -212,7 +212,7 @@ outduct_element_config_t& outduct_element_config_t::operator=(const outduct_elem
       activeSessionDataOnDiskDirectory = o.activeSessionDataOnDiskDirectory;
       rateLimitPrecisionMicroSec = o.rateLimitPrecisionMicroSec;
 
-      ramaHeaderByte = o.ramaHeaderByte;
+      hilinkHeaderByte = o.hilinkHeaderByte;
 
       comPort = o.comPort;
       baudRate = o.baudRate;
@@ -264,7 +264,7 @@ outduct_element_config_t& outduct_element_config_t::operator=(outduct_element_co
       activeSessionDataOnDiskDirectory = std::move(o.activeSessionDataOnDiskDirectory);
       rateLimitPrecisionMicroSec = o.rateLimitPrecisionMicroSec;
 
-      ramaHeaderByte = o.ramaHeaderByte;
+      hilinkHeaderByte = o.hilinkHeaderByte;
 
       comPort = std::move(o.comPort);
       baudRate = o.baudRate;
@@ -315,7 +315,7 @@ bool outduct_element_config_t::operator==(const outduct_element_config_t & o) co
           (activeSessionDataOnDiskDirectory == o.activeSessionDataOnDiskDirectory) &&
           (rateLimitPrecisionMicroSec == o.rateLimitPrecisionMicroSec) &&
 
-          (ramaHeaderByte == o.ramaHeaderByte) &&
+          (hilinkHeaderByte == o.hilinkHeaderByte) &&
 
           (comPort == o.comPort) &&
           (baudRate == o.baudRate) &&
@@ -416,12 +416,12 @@ bool OutductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree
               outductElementConfig.maxNumberOfBundlesInPipeline = outductElementConfigPt.second.get<uint32_t>("maxNumberOfBundlesInPipeline");
               outductElementConfig.maxSumOfBundleBytesInPipeline = outductElementConfigPt.second.get<uint64_t>("maxSumOfBundleBytesInPipeline");
 
-              if (outductElementConfig.convergenceLayer == "rama") {
-                  outductElementConfig.ramaHeaderByte = static_cast<uint8_t>(outductElementConfigPt.second.get<uint16_t>("ramaHeaderByte"));
+              if (outductElementConfig.convergenceLayer == "hilink") {
+                  outductElementConfig.hilinkHeaderByte = static_cast<uint8_t>(outductElementConfigPt.second.get<uint16_t>("hilinkHeaderByte"));
               }
-              else if (outductElementConfigPt.second.count("ramaHeaderByte") != 0) {
+              else if (outductElementConfigPt.second.count("hilinkHeaderByte") != 0) {
                   LOG_ERROR(subprocess) << "error parsing JSON outductVector[" << (vectorIndex - 1) << "]: outduct convergence layer  "
-                      << outductElementConfig.convergenceLayer << " has a rama outduct only configuration parameter of \"ramaHeaderByte\".. please remove";
+                      << outductElementConfig.convergenceLayer << " has a hilink outduct only configuration parameter of \"hilinkHeaderByte\".. please remove";
                   return false;
               }
 
@@ -485,7 +485,7 @@ bool OutductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree
                 }
             }
 
-              if (outductElementConfig.convergenceLayer == "ltp_over_udp" || outductElementConfig.convergenceLayer == "udp" || outductElementConfig.convergenceLayer == "rama") {
+              if (outductElementConfig.convergenceLayer == "ltp_over_udp" || outductElementConfig.convergenceLayer == "udp" || outductElementConfig.convergenceLayer == "hilink") {
                 outductElementConfig.rateLimitPrecisionMicroSec = outductElementConfigPt.second.get<uint64_t>("rateLimitPrecisionMicroSec", DEFAULT_RATE_LIMIT_PRECISION);
                 if (outductElementConfig.rateLimitPrecisionMicroSec == 0) {
                     LOG_ERROR(subprocess) << "error parsing JSON outductVector[" << (vectorIndex - 1) << "]: rateLimitPrecisionMicroSec " <<
@@ -645,8 +645,8 @@ boost::property_tree::ptree OutductsConfig::GetNewPropertyTree() const {
         outductElementConfigPt.put("maxNumberOfBundlesInPipeline", outductElementConfig.maxNumberOfBundlesInPipeline);
           outductElementConfigPt.put("maxSumOfBundleBytesInPipeline", outductElementConfig.maxSumOfBundleBytesInPipeline);
 
-          if (outductElementConfig.convergenceLayer == "rama") {
-              outductElementConfigPt.put("ramaHeaderByte", outductElementConfig.ramaHeaderByte);
+          if (outductElementConfig.convergenceLayer == "hilink") {
+              outductElementConfigPt.put("hilinkHeaderByte", outductElementConfig.hilinkHeaderByte);
           }
         
         if ((outductElementConfig.convergenceLayer == "ltp_over_udp")
@@ -678,7 +678,7 @@ boost::property_tree::ptree OutductsConfig::GetNewPropertyTree() const {
             outductElementConfigPt.put("activeSessionDataOnDiskNewFileDurationMs", outductElementConfig.activeSessionDataOnDiskNewFileDurationMs);
             outductElementConfigPt.put("activeSessionDataOnDiskDirectory", outductElementConfig.activeSessionDataOnDiskDirectory.string()); //.string() prevents nested quotes in json file
         }
-          if ((outductElementConfig.convergenceLayer == "ltp_over_udp") || (outductElementConfig.convergenceLayer == "udp") || (outductElementConfig.convergenceLayer == "rama")) {
+          if ((outductElementConfig.convergenceLayer == "ltp_over_udp") || (outductElementConfig.convergenceLayer == "udp") || (outductElementConfig.convergenceLayer == "hilink")) {
             outductElementConfigPt.put("rateLimitPrecisionMicroSec", outductElementConfig.rateLimitPrecisionMicroSec);
         }
         if (outductElementConfig.convergenceLayer == "bp_over_encap_local_stream") {

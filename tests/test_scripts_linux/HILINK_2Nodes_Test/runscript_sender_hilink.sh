@@ -2,8 +2,8 @@
 
 # path variables
 config_files=$HDTN_SOURCE_ROOT/config_files
-hdtn_config=$config_files/hdtn/hdtn_Node1_rama.json
-gen_config=$config_files/outducts/bpgen_one_rama_port4556_header161.json
+hdtn_config=$config_files/hdtn/hdtn_Node1_hilink.json
+gen_config=$config_files/outducts/bpgen_one_hilink_port4556_header161.json
 
 cd $HDTN_SOURCE_ROOT
 

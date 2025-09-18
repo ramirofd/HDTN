@@ -1,15 +1,15 @@
-#ifndef RAMA_OUTDUCT_H
-#define RAMA_OUTDUCT_H 1
+#ifndef HILINK_OUTDUCT_H
+#define HILINK_OUTDUCT_H 1
 
 #include <string>
 #include "Outduct.h"
 #include "UdpBundleSource.h"
 #include <list>
 
-class CLASS_VISIBILITY_OUTDUCT_MANAGER_LIB RamaOutduct : public Outduct {
+class CLASS_VISIBILITY_OUTDUCT_MANAGER_LIB HilinkOutduct : public Outduct {
 public:
-    OUTDUCT_MANAGER_LIB_EXPORT RamaOutduct(const outduct_element_config_t & outductConfig, const uint64_t outductUuid);
-    OUTDUCT_MANAGER_LIB_EXPORT virtual ~RamaOutduct() override;
+    OUTDUCT_MANAGER_LIB_EXPORT HilinkOutduct(const outduct_element_config_t & outductConfig, const uint64_t outductUuid);
+    OUTDUCT_MANAGER_LIB_EXPORT virtual ~HilinkOutduct() override;
     OUTDUCT_MANAGER_LIB_EXPORT virtual void PopulateOutductTelemetry(std::unique_ptr<OutductTelemetry_t>& outductTelem) override;
     OUTDUCT_MANAGER_LIB_EXPORT virtual std::size_t GetTotalBundlesUnacked() const noexcept override;
     OUTDUCT_MANAGER_LIB_EXPORT virtual bool Forward(const uint8_t* bundleData, const std::size_t size, std::vector<uint8_t>&& userData) override;
@@ -29,9 +29,9 @@ public:
     OUTDUCT_MANAGER_LIB_EXPORT virtual void GetOutductFinalStats(OutductFinalStats & finalStats) override;
 
 private:
-    RamaOutduct();
+    HilinkOutduct();
 
     UdpBundleSource m_udpBundleSource;
 };
 
-#endif // RAMA_OUTDUCT_H
+#endif // HILINK_OUTDUCT_H

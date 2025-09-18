@@ -3,13 +3,13 @@
     "outductVector": [
         {
             "name": "bpgen",
-            "convergenceLayer": "rama",
+            "convergenceLayer": "hilink",
             "nextHopNodeId": 10,
             "remoteHostname": "localhost",
             "remotePort": 4556,
             "maxNumberOfBundlesInPipeline": 5,
             "maxSumOfBundleBytesInPipeline": 50000000,
-            "ramaHeaderByte": 161
+            "hilinkHeaderByte": 161
         }
     ]
 }

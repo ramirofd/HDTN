@@ -68,8 +68,8 @@ struct outduct_element_config_t {
     //specific to udp and ltp
     uint64_t rateLimitPrecisionMicroSec;
 
-    //specific to rama
-    uint8_t ramaHeaderByte;
+    //specific to hilink
+    uint8_t hilinkHeaderByte;
 
     //specific to slip over uart
     std::string comPort;

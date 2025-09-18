@@ -1,5 +1,5 @@
 {
-    "hdtnConfigName": "rama example",
+    "hdtnConfigName": "hilink example",
     "userInterfaceOn": true,
     "mySchemeName": "unused_scheme_name",
     "myNodeId": 10,
@@ -24,12 +24,12 @@
         "inductConfigName": "myconfig",
         "inductVector": [
             {
-                "name": "rama_ingress",
-                "convergenceLayer": "rama",
+                "name": "hilink_ingress",
+                "convergenceLayer": "hilink",
                 "boundPort": 4556,
                 "numRxCircularBufferElements": 2000,
                 "numRxCircularBufferBytesPerElement": 65535,
-                "ramaHeaderByte": 161
+                "hilinkHeaderByte": 161
             }
         ]
     },
@@ -37,14 +37,14 @@
         "outductConfigName": "myconfig",
         "outductVector": [
             {
-                "name": "rama_egress",
-                "convergenceLayer": "rama",
+                "name": "hilink_egress",
+                "convergenceLayer": "hilink",
                 "nextHopNodeId": 2,
                 "remoteHostname": "localhost",
                 "remotePort": 4558,
                 "maxNumberOfBundlesInPipeline": 50,
                 "maxSumOfBundleBytesInPipeline": 50000000,
-                "ramaHeaderByte": 161
+                "hilinkHeaderByte": 161
             }
         ]
     },
