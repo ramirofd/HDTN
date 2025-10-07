@@ -31,6 +31,7 @@ build-default:
     expire_in: 2 days
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_PIPELINE_SOURCE == 'pipeline'
 
 # Build HDTN with Visual Studio 2022
 build-and-run-win:
@@ -205,6 +206,8 @@ build-static-analysis:
       when: never
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_PIPELINE_SOURCE == 'web'
+    - if: $CI_PIPELINE_SOURCE == "pipeline"
 
 # Run unit tests and generate a test report
 unit-test:
@@ -228,6 +231,7 @@ unit-test:
     expire_in: 1 week
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_PIPELINE_SOURCE == 'pipeline'
 
 # Run integrated tests and generate a test report
 integrated-test:
@@ -307,6 +311,29 @@ static-analysis-development:
       when: never
     - if: $CI_PIPELINE_SOURCE == "schedule"
 
+# Static Analysis Report
+static-analysis-report:
+  stage: scan-stage
+  tags:
+    - cov-analysis
+  dependencies:
+    - build-static-analysis
+  needs:
+    - build-static-analysis
+  script:
+    - export PATH=/home/hdtn/cov-analysis-linux64-2022.6.1/bin:$PATH
+    - files=$(find -type f -name "*.cpp" -o -name "*.h" -o -name ".hpp")
+    - |
+      LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgio-2.0.so.0 cov-run-desktop --dir build/idir --url $COV_BUILD_SERVER \
+        --auth-key-file /home/hdtn/ci-auth.key --stream HDTN-development --exit1-if-defects false \
+        --ignore-uncapturable-inputs true --all --enable-constraint-fpp --enable-fnptr --enable-virtual --text-output=report.txt $files
+  artifacts:
+    paths:
+      - report.txt
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == 'web'
+    - if: $CI_PIPELINE_SOURCE == "pipeline"
 
 # Code test coverage
 code-test-coverage:
@@ -424,3 +451,18 @@ issue-count:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $DO_MONTHLY_SLOC_COUNT == "true"
+
+# Cyclomatic Complexity (CCM)
+high-ccm:
+  stage: scan-stage
+  tags:
+    - docker
+    - linux-x86
+  image: $CI_REGISTRY/hdtn-v4/hdtn/debian-base
+  script:
+    - git fetch --prune
+    - python3 ci/detect_high_ccm.py
+  dependencies: []
+  needs: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'

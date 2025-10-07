@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [2.0.0] – 2025-07-17
+
+### Changed
+* Pipeline Improvements for running static analysis.
+* BPSend/Receive corrections for running and stopping scripts.
+* Draft prototype for file transfer application.
+
 ## [1.3.1] - 2024-05-24
 
 ### Added

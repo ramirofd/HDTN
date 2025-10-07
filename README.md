@@ -7,7 +7,7 @@ Delay Tolerant Networking (DTN) has been identified as a key technology to facil
 
 High-rate Delay Tolerant Networking (HDTN) takes advantage of modern hardware platforms to substantially reduce latency and improve throughput compared to today’s DTN operations. HDTN maintains compatibility with existing deployments of DTN that conform to IETF RFC 5050. At the same time, HDTN defines a new data format better suited to higher-rate operation. It defines and adopts a massively parallel pipelined and message-oriented architecture, allowing the system to scale gracefully as its resources increase. HDTN’s architecture also supports hooks to replace various processing pipeline elements with specialized hardware accelerators. This offers improved Size, Weight, and Power (SWaP) characteristics while reducing development complexity and cost.
 
-The HDTN team has completed an extensive review of the major DTN protocols and specifications. Our requirements analysis is captured in [E-20225TM_Cover.indd (nasa.gov)](https://ntrs.nasa.gov/api/citations/20240004702/downloads/TM-20240004702.pdf). Also see the [HDTN Wiki](https://github.com/nasa/HDTN/wiki) and the [HDTN User Guide](https://ntrs.nasa.gov/api/citations/20230015434/downloads/HDTN_Users_Guide_AfterEditor2.pdf) for more information.
+For more information, refer to the relevant documents attached to the releases. https://github.com/nasa/HDTN/releases
 
 Architecture
 =============
@@ -23,31 +23,26 @@ Build Environment
 ## Tested Platforms ##
 * Linux
     * Ubuntu 20.04.2 LTS
-    * Debian 10
-    * RHEL (Red Hat Enterprise Linux) 8
-    * ARM64
+    * Debian 10.13
+    * Oracle Linux Server 8
+    * Ubuntu 20.04.2 LTS (ARM64)
 * Windows
-    * Windows 10 (64-bit)
-    * Windows Server 2022 (64-bit)
-    * Windows Server 2019 (64-bit)
+    * Windows 11 (64-bit)
 * macOS
-    * Apple Silicon M2 on Ventura
-    * Intel x64 on Ventura
-* FreeBSD Intel x64
-* OpenBSD Intel x64
+    * Apple Silicon M2 on Sonoma
+    * Intel x64 on Sonoma 
+* FreeBSD 14.3 Intel x64
+* OpenBSD 7.7 Intel x64
 * Raspbian
-* ARM on x86
 
 ## Dependencies ## 
 HDTN build environment requires:
 * CMake version 3.12 minimum
-* Boost library version 1.66.0 minimum, version 1.69.0 for TCPCLv4 TLS version 1.3 support
+* Boost library version 1.66.0 minimum, version 1.69.0 for TCPCLv4 TLS version 1.3 support. Version 1.86 is the maximum version supported.
 * ZeroMQ (tested with version 4.3.4)
-* OpenSSL (recommended version 1.1.1).  If OpenSSL is not available, disable OpenSSL support via the CMake cache variable `ENABLE_OPENSSL_SUPPORT:BOOL`
-* On Linux: gcc version 9.3.0 (Debian 8.3.0-6)
+* OpenSSL (minimum version 1.1.1).  If OpenSSL is not available, disable OpenSSL support via the CMake cache variable `ENABLE_OPENSSL_SUPPORT:BOOL`
+* On Linux: gcc minimum version 9.3.0
 * On Windows: see the [Windows Build Instructions](building_on_windows/readme_building_on_windows.md)
-* Target: x86_64-linux-gnu 
-* Tested platforms: Ubuntu 20.04.2 LTS, Debian 10, Windows 10 (Visual Studio), Windows Server 2019 (Visual Studio), Windows Server 2022 (Visual Studio), and Mac
 
 These can be installed on Linux with:
 * On Ubuntu
