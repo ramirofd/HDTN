@@ -21,6 +21,7 @@
 #include "StcpOutduct.h"
 #include "UdpOutduct.h"
 #include "HilinkOutduct.h"
+#include "HilinkTcpOutduct.h"
 #include "LtpOverUdpOutduct.h"
 #include "LtpOverIpcOutduct.h"
 #include "LtpOverEncapLocalStreamOutduct.h"
@@ -110,6 +111,9 @@ bool OutductManager::LoadOutductsFromConfig(const OutductsConfig & outductsConfi
         else if (thisOutductConfig.convergenceLayer == "hilink") {
             outductSharedPtr = std::make_shared<HilinkOutduct>(thisOutductConfig, uuidIndex);
         }
+        else if (thisOutductConfig.convergenceLayer == "hilink_tcp") {
+            outductSharedPtr = std::make_shared<HilinkTcpOutduct>(thisOutductConfig, uuidIndex);
+        }
         else if (thisOutductConfig.convergenceLayer == "ltp_over_udp") {
             outductSharedPtr = std::make_shared<LtpOverUdpOutduct>(thisOutductConfig, uuidIndex);
         }
@@ -141,7 +145,7 @@ bool OutductManager::LoadOutductsFromConfig(const OutductsConfig & outductsConfi
             m_outductsVec.push_back(std::move(outductSharedPtr)); //uuid will be the array index
             //for any connection-oriented convergence layer, initially send link down event,
             // and when connection completes, the convergence layer will send a link up event
-            if ((thisOutductConfig.convergenceLayer == "tcpcl_v3") || (thisOutductConfig.convergenceLayer == "tcpcl_v4") || (thisOutductConfig.convergenceLayer == "stcp")) {
+            if ((thisOutductConfig.convergenceLayer == "tcpcl_v3") || (thisOutductConfig.convergenceLayer == "tcpcl_v4") || (thisOutductConfig.convergenceLayer == "stcp") || (thisOutductConfig.convergenceLayer == "hilink_tcp")) {
                 if (onOutductLinkStatusChangedCallback) { //send initial link down event
                     LOG_DEBUG(subprocess) << "Outduct index(" << uuidIndex
                         << ") with connection-oriented convergence layer " << thisOutductConfig.convergenceLayer

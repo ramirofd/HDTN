@@ -26,7 +26,7 @@ static constexpr hdtn::Logger::SubProcess subprocess = hdtn::Logger::SubProcess:
 
 static const std::vector<std::string> VALID_CONVERGENCE_LAYER_NAMES = {
     "ltp_over_udp", "ltp_over_ipc", "ltp_over_encap_local_stream", "bp_over_encap_local_stream",
-    "udp", "stcp", "tcpcl_v3", "tcpcl_v4", "slip_over_uart", "hilink"
+    "udp", "stcp", "tcpcl_v3", "tcpcl_v4", "slip_over_uart", "hilink", "hilink_tcp"
 };
 
 static const uint64_t DEFAULT_RATE_LIMIT_PRECISION = 100000;
@@ -384,6 +384,7 @@ bool OutductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree
         try {
             outductElementConfig.name = outductElementConfigPt.second.get<std::string>("name");
             outductElementConfig.convergenceLayer = outductElementConfigPt.second.get<std::string>("convergenceLayer");
+            const bool isHilinkOutduct = (outductElementConfig.convergenceLayer == "hilink") || (outductElementConfig.convergenceLayer == "hilink_tcp");
             outductElementConfig.nextHopNodeId = outductElementConfigPt.second.get<uint64_t>("nextHopNodeId");
             {
                 bool found = false;
@@ -416,7 +417,7 @@ bool OutductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree
               outductElementConfig.maxNumberOfBundlesInPipeline = outductElementConfigPt.second.get<uint32_t>("maxNumberOfBundlesInPipeline");
               outductElementConfig.maxSumOfBundleBytesInPipeline = outductElementConfigPt.second.get<uint64_t>("maxSumOfBundleBytesInPipeline");
 
-              if (outductElementConfig.convergenceLayer == "hilink") {
+              if (isHilinkOutduct) {
                   outductElementConfig.hilinkHeaderByte = static_cast<uint8_t>(outductElementConfigPt.second.get<uint16_t>("hilinkHeaderByte"));
               }
               else if (outductElementConfigPt.second.count("hilinkHeaderByte") != 0) {
@@ -485,7 +486,7 @@ bool OutductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree
                 }
             }
 
-              if (outductElementConfig.convergenceLayer == "ltp_over_udp" || outductElementConfig.convergenceLayer == "udp" || outductElementConfig.convergenceLayer == "hilink") {
+              if (outductElementConfig.convergenceLayer == "ltp_over_udp" || outductElementConfig.convergenceLayer == "udp" || isHilinkOutduct) {
                 outductElementConfig.rateLimitPrecisionMicroSec = outductElementConfigPt.second.get<uint64_t>("rateLimitPrecisionMicroSec", DEFAULT_RATE_LIMIT_PRECISION);
                 if (outductElementConfig.rateLimitPrecisionMicroSec == 0) {
                     LOG_ERROR(subprocess) << "error parsing JSON outductVector[" << (vectorIndex - 1) << "]: rateLimitPrecisionMicroSec " <<
@@ -645,7 +646,7 @@ boost::property_tree::ptree OutductsConfig::GetNewPropertyTree() const {
         outductElementConfigPt.put("maxNumberOfBundlesInPipeline", outductElementConfig.maxNumberOfBundlesInPipeline);
           outductElementConfigPt.put("maxSumOfBundleBytesInPipeline", outductElementConfig.maxSumOfBundleBytesInPipeline);
 
-          if (outductElementConfig.convergenceLayer == "hilink") {
+          if ((outductElementConfig.convergenceLayer == "hilink") || (outductElementConfig.convergenceLayer == "hilink_tcp")) {
               outductElementConfigPt.put("hilinkHeaderByte", outductElementConfig.hilinkHeaderByte);
           }
         
@@ -678,7 +679,7 @@ boost::property_tree::ptree OutductsConfig::GetNewPropertyTree() const {
             outductElementConfigPt.put("activeSessionDataOnDiskNewFileDurationMs", outductElementConfig.activeSessionDataOnDiskNewFileDurationMs);
             outductElementConfigPt.put("activeSessionDataOnDiskDirectory", outductElementConfig.activeSessionDataOnDiskDirectory.string()); //.string() prevents nested quotes in json file
         }
-          if ((outductElementConfig.convergenceLayer == "ltp_over_udp") || (outductElementConfig.convergenceLayer == "udp") || (outductElementConfig.convergenceLayer == "hilink")) {
+          if ((outductElementConfig.convergenceLayer == "ltp_over_udp") || (outductElementConfig.convergenceLayer == "udp") || (outductElementConfig.convergenceLayer == "hilink") || (outductElementConfig.convergenceLayer == "hilink_tcp")) {
             outductElementConfigPt.put("rateLimitPrecisionMicroSec", outductElementConfig.rateLimitPrecisionMicroSec);
         }
         if (outductElementConfig.convergenceLayer == "bp_over_encap_local_stream") {
@@ -688,7 +689,7 @@ boost::property_tree::ptree OutductsConfig::GetNewPropertyTree() const {
             outductElementConfigPt.put("comPort", outductElementConfig.comPort);
             outductElementConfigPt.put("baudRate", outductElementConfig.baudRate);
         }
-        if ((outductElementConfig.convergenceLayer == "stcp") || (outductElementConfig.convergenceLayer == "tcpcl_v3") || (outductElementConfig.convergenceLayer == "tcpcl_v4")) {
+        if ((outductElementConfig.convergenceLayer == "stcp") || (outductElementConfig.convergenceLayer == "tcpcl_v3") || (outductElementConfig.convergenceLayer == "tcpcl_v4") || (outductElementConfig.convergenceLayer == "hilink_tcp")) {
             outductElementConfigPt.put("keepAliveIntervalSeconds", outductElementConfig.keepAliveIntervalSeconds);
         }
         if (outductElementConfig.convergenceLayer == "tcpcl_v3") {

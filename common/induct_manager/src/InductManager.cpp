@@ -21,6 +21,7 @@
 #include "StcpInduct.h"
 #include "UdpInduct.h"
 #include "HilinkInduct.h"
+#include "HilinkTcpInduct.h"
 #include "LtpOverUdpInduct.h"
 #include "LtpOverIpcInduct.h"
 #include "LtpOverEncapLocalStreamInduct.h"
@@ -72,6 +73,10 @@ bool InductManager::LoadInductsFromConfig(const InductProcessBundleCallback_t & 
         }
         else if (thisInductConfig.convergenceLayer == "hilink") {
             m_inductsList.emplace_back(boost::make_unique<HilinkInduct>(inductProcessBundleCallback, thisInductConfig));
+        }
+        else if (thisInductConfig.convergenceLayer == "hilink_tcp") {
+            m_inductsList.emplace_back(boost::make_unique<HilinkTcpInduct>(inductProcessBundleCallback, thisInductConfig,
+                maxBundleSizeBytes, onNewOpportunisticLinkCallback, onDeletedOpportunisticLinkCallback));
         }
         else if (thisInductConfig.convergenceLayer == "ltp_over_udp") {
             m_inductsList.emplace_back(boost::make_unique<LtpOverUdpInduct>(inductProcessBundleCallback, thisInductConfig, maxBundleSizeBytes));

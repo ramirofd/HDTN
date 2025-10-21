@@ -25,7 +25,7 @@ static constexpr hdtn::Logger::SubProcess subprocess = hdtn::Logger::SubProcess:
 
 static const std::vector<std::string> VALID_CONVERGENCE_LAYER_NAMES = {
     "ltp_over_udp", "ltp_over_ipc", "ltp_over_encap_local_stream", "bp_over_encap_local_stream",
-    "udp", "stcp", "tcpcl_v3", "tcpcl_v4", "slip_over_uart", "hilink"
+    "udp", "stcp", "tcpcl_v3", "tcpcl_v4", "slip_over_uart", "hilink", "hilink_tcp"
 };
 
 induct_element_config_t::induct_element_config_t() :
@@ -366,6 +366,7 @@ bool InductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree 
         try {
             inductElementConfig.name = inductElementConfigPt.second.get<std::string>("name");
             inductElementConfig.convergenceLayer = inductElementConfigPt.second.get<std::string>("convergenceLayer");
+            const bool isHilinkInduct = (inductElementConfig.convergenceLayer == "hilink") || (inductElementConfig.convergenceLayer == "hilink_tcp");
             {
                 bool found = false;
                 for (std::vector<std::string>::const_iterator it = VALID_CONVERGENCE_LAYER_NAMES.cbegin(); it != VALID_CONVERGENCE_LAYER_NAMES.cend(); ++it) {
@@ -394,7 +395,7 @@ bool InductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree 
             { //no cb, relies on buffering from the local socket or pipe
                 inductElementConfig.numRxCircularBufferElements = inductElementConfigPt.second.get<uint32_t>("numRxCircularBufferElements");
             }
-              if ((inductElementConfig.convergenceLayer == "udp") || (inductElementConfig.convergenceLayer == "tcpcl_v3") || (inductElementConfig.convergenceLayer == "tcpcl_v4") || (inductElementConfig.convergenceLayer == "hilink")) {
+              if ((inductElementConfig.convergenceLayer == "udp") || (inductElementConfig.convergenceLayer == "tcpcl_v3") || (inductElementConfig.convergenceLayer == "tcpcl_v4") || isHilinkInduct) {
                   inductElementConfig.numRxCircularBufferBytesPerElement = inductElementConfigPt.second.get<uint32_t>("numRxCircularBufferBytesPerElement");
               }
               else if (inductElementConfigPt.second.count("numRxCircularBufferBytesPerElement")) { //not used by stcp or ltp
@@ -403,7 +404,7 @@ bool InductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree 
                   return false;
               }
 
-              if (inductElementConfig.convergenceLayer == "hilink") {
+              if (isHilinkInduct) {
                   inductElementConfig.hilinkHeaderByte = static_cast<uint8_t>(inductElementConfigPt.second.get<uint16_t>("hilinkHeaderByte"));
               }
               else if (inductElementConfigPt.second.count("hilinkHeaderByte") != 0) {
@@ -499,12 +500,12 @@ bool InductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree 
                 inductElementConfig.remoteNodeId = inductElementConfigPt.second.get<uint64_t>("remoteNodeId");
             }
 
-            if ((inductElementConfig.convergenceLayer == "stcp") || (inductElementConfig.convergenceLayer == "tcpcl_v3") || (inductElementConfig.convergenceLayer == "tcpcl_v4")) {
+            if ((inductElementConfig.convergenceLayer == "stcp") || (inductElementConfig.convergenceLayer == "tcpcl_v3") || (inductElementConfig.convergenceLayer == "tcpcl_v4") || (inductElementConfig.convergenceLayer == "hilink_tcp")) {
                 inductElementConfig.keepAliveIntervalSeconds = inductElementConfigPt.second.get<uint16_t>("keepAliveIntervalSeconds");
             }
             else if (inductElementConfigPt.second.count("keepAliveIntervalSeconds") != 0) {
                 LOG_ERROR(subprocess) << "error parsing JSON inductVector[" << (vectorIndex - 1) << "]: induct convergence layer  " << inductElementConfig.convergenceLayer
-                    << " has an stcp or tcpcl induct only configuration parameter of \"keepAliveIntervalSeconds\".. please remove";
+                    << " has an stcp, hilink_tcp, or tcpcl induct only configuration parameter of \"keepAliveIntervalSeconds\".. please remove";
                 return false;
             }
 
@@ -625,10 +626,10 @@ boost::property_tree::ptree InductsConfig::GetNewPropertyTree() const {
         { //no cb, relies on buffering from the local socket or pipe
             inductElementConfigPt.put("numRxCircularBufferElements", inductElementConfig.numRxCircularBufferElements);
         }
-        if ((inductElementConfig.convergenceLayer == "udp") || (inductElementConfig.convergenceLayer == "tcpcl_v3") || (inductElementConfig.convergenceLayer == "tcpcl_v4") || (inductElementConfig.convergenceLayer == "hilink")) {
+        if ((inductElementConfig.convergenceLayer == "udp") || (inductElementConfig.convergenceLayer == "tcpcl_v3") || (inductElementConfig.convergenceLayer == "tcpcl_v4") || (inductElementConfig.convergenceLayer == "hilink") || (inductElementConfig.convergenceLayer == "hilink_tcp")) {
             inductElementConfigPt.put("numRxCircularBufferBytesPerElement", inductElementConfig.numRxCircularBufferBytesPerElement);
         }
-        if (inductElementConfig.convergenceLayer == "hilink") {
+        if ((inductElementConfig.convergenceLayer == "hilink") || (inductElementConfig.convergenceLayer == "hilink_tcp")) {
             inductElementConfigPt.put("hilinkHeaderByte", inductElementConfig.hilinkHeaderByte);
         }
         if ((inductElementConfig.convergenceLayer == "ltp_over_udp")
@@ -669,7 +670,7 @@ boost::property_tree::ptree InductsConfig::GetNewPropertyTree() const {
         if ((inductElementConfig.convergenceLayer == "slip_over_uart") || inductElementConfig.convergenceLayer == "bp_over_encap_local_stream") {
             inductElementConfigPt.put("remoteNodeId", inductElementConfig.remoteNodeId);
         }
-        if ((inductElementConfig.convergenceLayer == "stcp") || (inductElementConfig.convergenceLayer == "tcpcl_v3") || (inductElementConfig.convergenceLayer == "tcpcl_v4")) {
+        if ((inductElementConfig.convergenceLayer == "stcp") || (inductElementConfig.convergenceLayer == "tcpcl_v3") || (inductElementConfig.convergenceLayer == "tcpcl_v4") || (inductElementConfig.convergenceLayer == "hilink_tcp")) {
             inductElementConfigPt.put("keepAliveIntervalSeconds", inductElementConfig.keepAliveIntervalSeconds);
         }
         if (inductElementConfig.convergenceLayer == "tcpcl_v3") {

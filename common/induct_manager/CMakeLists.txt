@@ -6,6 +6,7 @@ add_library(induct_manager_lib
         src/StcpInduct.cpp
     src/UdpInduct.cpp
         src/HilinkInduct.cpp
+        src/HilinkTcpInduct.cpp
         src/LtpInduct.cpp
 	src/LtpOverEncapLocalStreamInduct.cpp
 	src/LtpOverIpcInduct.cpp
@@ -33,6 +34,7 @@ set(MY_PUBLIC_HEADERS
         include/TcpclV4Induct.h
         include/UdpInduct.h
         include/HilinkInduct.h
+        include/HilinkTcpInduct.h
         ${CMAKE_CURRENT_BINARY_DIR}/induct_manager_lib_export.h
 )
 set_target_properties(induct_manager_lib PROPERTIES PUBLIC_HEADER "${MY_PUBLIC_HEADERS}") # this needs to be a list, so putting in quotes makes it a ; separated list

@@ -5,6 +5,7 @@ add_library(outduct_manager_lib
         src/StcpOutduct.cpp
     src/UdpOutduct.cpp
         src/HilinkOutduct.cpp
+        src/HilinkTcpOutduct.cpp
         src/LtpOutduct.cpp
 	src/LtpOverEncapLocalStreamOutduct.cpp
 	src/LtpOverIpcOutduct.cpp
@@ -31,6 +32,7 @@ set(MY_PUBLIC_HEADERS
         include/TcpclV4Outduct.h
         include/UdpOutduct.h
         include/HilinkOutduct.h
+        include/HilinkTcpOutduct.h
         include/SlipOverUartOutduct.h
 	include/BpOverEncapLocalStreamOutduct.h
 	${CMAKE_CURRENT_BINARY_DIR}/outduct_manager_lib_export.h
