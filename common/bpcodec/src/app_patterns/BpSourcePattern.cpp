@@ -27,6 +27,8 @@
 #include "TcpclInduct.h"
 #include "TcpclV4Induct.h"
 #include "StcpInduct.h"
+#include "HilinkInduct.h"
+#include "HilinkTcpInduct.h"
 #include "codec/BundleViewV7.h"
 #include "ThreadNamer.h"
 #include "BinaryConversions.h"
@@ -1159,6 +1161,16 @@ void BpSourcePattern::OnNewOpportunisticLinkCallback(const uint64_t remoteNodeId
         LOG_INFO(subprocess) << "New opportunistic link detected on TcpclV4 induct for ipn:" << remoteNodeId << ".*";
         m_tcpclOpportunisticRemoteNodeId = remoteNodeId;
     }
+    else if (HilinkInduct* hilinkInductPtr = dynamic_cast<HilinkInduct*>(thisInductPtr)) {
+        m_tcpclInductPtr = hilinkInductPtr;
+        LOG_INFO(subprocess) << "New opportunistic link detected on Hilink induct for ipn:" << remoteNodeId << ".*";
+        m_tcpclOpportunisticRemoteNodeId = remoteNodeId;
+    }
+    else if (HilinkTcpInduct* hilinkTcpInductPtr = dynamic_cast<HilinkTcpInduct*>(thisInductPtr)) {
+        m_tcpclInductPtr = hilinkTcpInductPtr;
+        LOG_INFO(subprocess) << "New opportunistic link detected on HilinkTcp induct for ipn:" << remoteNodeId << ".*";
+        m_tcpclOpportunisticRemoteNodeId = remoteNodeId;
+    }
     else if (dynamic_cast<StcpInduct*>(thisInductPtr)) {
 
     }
@@ -1169,6 +1181,12 @@ void BpSourcePattern::OnNewOpportunisticLinkCallback(const uint64_t remoteNodeId
 void BpSourcePattern::OnDeletedOpportunisticLinkCallback(const uint64_t remoteNodeId, Induct* thisInductPtr, void* sinkPtrAboutToBeDeleted) {
     (void)sinkPtrAboutToBeDeleted;
     if (dynamic_cast<StcpInduct*>(thisInductPtr)) {
+
+    }
+    else if (dynamic_cast<HilinkInduct*>(thisInductPtr)) {
+
+    }
+    else if (dynamic_cast<HilinkTcpInduct*>(thisInductPtr)) {
 
     }
     else {

@@ -24,6 +24,8 @@
 #include "StcpInduct.h"
 #include "SlipOverUartInduct.h"
 #include "BpOverEncapLocalStreamInduct.h"
+#include "HilinkInduct.h"
+#include "HilinkTcpInduct.h"
 #include "codec/BundleViewV7.h"
 #include "Logger.h"
 #include "StatsLogger.h"
@@ -641,6 +643,18 @@ void BpSinkPattern::OnNewOpportunisticLinkCallback(const uint64_t remoteNodeId, 
         m_tcpclOpportunisticRemoteNodeId = remoteNodeId;
         m_opportunisticConvergenceLayerName = "TcpclV4";
     }
+    else if (HilinkInduct* hilinkInductPtr = dynamic_cast<HilinkInduct*>(thisInductPtr)) {
+        m_tcpclInductPtr = hilinkInductPtr;
+        LOG_INFO(subprocess) << "New opportunistic link detected on Hilink induct for ipn:" << remoteNodeId << ".*";
+        m_tcpclOpportunisticRemoteNodeId = remoteNodeId;
+        m_opportunisticConvergenceLayerName = "Hilink";
+    }
+    else if (HilinkTcpInduct* hilinkTcpInductPtr = dynamic_cast<HilinkTcpInduct*>(thisInductPtr)) {
+        m_tcpclInductPtr = hilinkTcpInductPtr;
+        LOG_INFO(subprocess) << "New opportunistic link detected on HilinkTcp induct for ipn:" << remoteNodeId << ".*";
+        m_tcpclOpportunisticRemoteNodeId = remoteNodeId;
+        m_opportunisticConvergenceLayerName = "HilinkTcp";
+    }
     else if (dynamic_cast<StcpInduct*>(thisInductPtr)) {
 
     }
@@ -663,6 +677,12 @@ void BpSinkPattern::OnNewOpportunisticLinkCallback(const uint64_t remoteNodeId, 
 void BpSinkPattern::OnDeletedOpportunisticLinkCallback(const uint64_t remoteNodeId, Induct* thisInductPtr, void* sinkPtrAboutToBeDeleted) {
     (void)sinkPtrAboutToBeDeleted;
     if (dynamic_cast<StcpInduct*>(thisInductPtr)) {
+
+    }
+    else if (dynamic_cast<HilinkInduct*>(thisInductPtr)) {
+
+    }
+    else if (dynamic_cast<HilinkTcpInduct*>(thisInductPtr)) {
 
     }
     else {
