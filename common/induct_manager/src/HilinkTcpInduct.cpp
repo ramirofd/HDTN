@@ -93,18 +93,26 @@ void HilinkTcpInduct::HandleTcpAccept(std::shared_ptr<boost::asio::ip::tcp::sock
 }
 
 void HilinkTcpInduct::HandleHilinkBundle(padded_vector_uint8_t & bundle) {
-    if (bundle.empty()) {
+    if (bundle.size() < 2) {
+        LOG_ERROR(subprocess) << "received hilink tcp bundle smaller than header+trailer (size=" << bundle.size() << ")";
         return;
     }
 
-    if (bundle[0] == m_inductConfig.hilinkHeaderByte) {
-        bundle.erase(bundle.begin());
-        m_inductProcessBundleCallback(bundle);
-    }
-    else {
-        LOG_ERROR(subprocess) << "unexpected hilink header byte " << static_cast<int>(bundle[0])
+    if (bundle.front() != m_inductConfig.hilinkHeaderByte) {
+        LOG_ERROR(subprocess) << "unexpected hilink header byte " << static_cast<int>(bundle.front())
                               << " expected " << static_cast<int>(m_inductConfig.hilinkHeaderByte);
+        return;
     }
+
+    if (bundle.back() != m_inductConfig.hilinkTrailerByte) {
+        LOG_ERROR(subprocess) << "unexpected hilink trailer byte " << static_cast<int>(bundle.back())
+                              << " expected " << static_cast<int>(m_inductConfig.hilinkTrailerByte);
+        return;
+    }
+
+    bundle.erase(bundle.begin());
+    bundle.pop_back();
+    m_inductProcessBundleCallback(bundle);
 }
 
 void HilinkTcpInduct::RemoveInactiveTcpConnections() {

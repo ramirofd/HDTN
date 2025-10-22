@@ -8,7 +8,8 @@
             "numRxCircularBufferElements": 2000,
             "numRxCircularBufferBytesPerElement": 65535,
             "keepAliveIntervalSeconds": 15,
-            "hilinkHeaderByte": 161
+            "hilinkHeaderByte": 161,
+            "hilinkTrailerByte": 161
         }
     ]
 }

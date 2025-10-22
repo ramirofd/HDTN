@@ -10,7 +10,8 @@
             "maxNumberOfBundlesInPipeline": 5,
             "maxSumOfBundleBytesInPipeline": 50000000,
             "keepAliveIntervalSeconds": 17,
-            "hilinkHeaderByte": 161
+            "hilinkHeaderByte": 161,
+            "hilinkTrailerByte": 161
         }
     ]
 }

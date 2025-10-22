@@ -7,7 +7,8 @@
             "boundPort": 4558,
             "numRxCircularBufferElements": 2000,
             "numRxCircularBufferBytesPerElement": 65535,
-            "hilinkHeaderByte": 161
+            "hilinkHeaderByte": 161,
+            "hilinkTrailerByte": 161
         }
     ]
 }

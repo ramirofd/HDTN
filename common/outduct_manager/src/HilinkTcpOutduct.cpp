@@ -16,26 +16,31 @@ std::size_t HilinkTcpOutduct::GetTotalBundlesUnacked() const noexcept {
 }
 
 bool HilinkTcpOutduct::Forward(const uint8_t* bundleData, const std::size_t size, std::vector<uint8_t>&& userData) {
-    padded_vector_uint8_t data(size + 1);
+    const std::size_t encodedSize = size + 2;
+    padded_vector_uint8_t data(encodedSize);
     data[0] = m_outductConfig.hilinkHeaderByte;
     if (size > 0) {
         std::memcpy(data.data() + 1, bundleData, size);
     }
+    data[encodedSize - 1] = m_outductConfig.hilinkTrailerByte;
     return m_stcpBundleSource.Forward(data, std::move(userData));
 }
 
 bool HilinkTcpOutduct::Forward(zmq::message_t & movableDataZmq, std::vector<uint8_t>&& userData) {
-    zmq::message_t data(movableDataZmq.size() + 1);
+    const std::size_t encodedSize = movableDataZmq.size() + 2;
+    zmq::message_t data(encodedSize);
     uint8_t* ptr = static_cast<uint8_t*>(data.data());
     ptr[0] = m_outductConfig.hilinkHeaderByte;
     if (movableDataZmq.size() > 0) {
         std::memcpy(ptr + 1, movableDataZmq.data(), movableDataZmq.size());
     }
+    ptr[encodedSize - 1] = m_outductConfig.hilinkTrailerByte;
     return m_stcpBundleSource.Forward(data, std::move(userData));
 }
 
 bool HilinkTcpOutduct::Forward(padded_vector_uint8_t& movableDataVec, std::vector<uint8_t>&& userData) {
     movableDataVec.insert(movableDataVec.begin(), m_outductConfig.hilinkHeaderByte);
+    movableDataVec.push_back(m_outductConfig.hilinkTrailerByte);
     return m_stcpBundleSource.Forward(movableDataVec, std::move(userData));
 }
 
