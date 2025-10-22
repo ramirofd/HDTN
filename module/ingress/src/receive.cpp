@@ -38,6 +38,8 @@
 #include "TcpclV4Induct.h"
 #include "StcpInduct.h"
 #include "SlipOverUartInduct.h"
+#include "HilinkInduct.h"
+#include "HilinkTcpInduct.h"
 #include "FreeListAllocator.h"
 #include "TelemetryDefinitions.h"
 #include "ThreadNamer.h"
@@ -1683,6 +1685,18 @@ void Ingress::Impl::OnNewOpportunisticLinkCallback(const uint64_t remoteNodeId, 
         boost::mutex::scoped_lock lock(m_availableDestOpportunisticNodeIdToTcpclInductMapMutex);
         m_availableDestOpportunisticNodeIdToTcpclInductMap[remoteNodeId] = tcpclV4InductPtr;
     }
+    else if (HilinkInduct* hilinkInductPtr = dynamic_cast<HilinkInduct*>(thisInductPtr)) {
+        LOG_INFO(subprocess) << "New opportunistic link detected on Hilink induct for ipn:" << remoteNodeId << ".*";
+        SendOpportunisticLinkMessages(remoteNodeId, true);
+        boost::mutex::scoped_lock lock(m_availableDestOpportunisticNodeIdToTcpclInductMapMutex);
+        m_availableDestOpportunisticNodeIdToTcpclInductMap[remoteNodeId] = hilinkInductPtr;
+    }
+    else if (HilinkTcpInduct* hilinkTcpInductPtr = dynamic_cast<HilinkTcpInduct*>(thisInductPtr)) {
+        LOG_INFO(subprocess) << "New opportunistic link detected on HilinkTcp induct for ipn:" << remoteNodeId << ".*";
+        SendOpportunisticLinkMessages(remoteNodeId, true);
+        boost::mutex::scoped_lock lock(m_availableDestOpportunisticNodeIdToTcpclInductMapMutex);
+        m_availableDestOpportunisticNodeIdToTcpclInductMap[remoteNodeId] = hilinkTcpInductPtr;
+    }
     else if (dynamic_cast<StcpInduct*>(thisInductPtr)) {
 
     }
@@ -1698,6 +1712,12 @@ void Ingress::Impl::OnNewOpportunisticLinkCallback(const uint64_t remoteNodeId, 
 }
 void Ingress::Impl::OnDeletedOpportunisticLinkCallback(const uint64_t remoteNodeId, Induct* thisInductPtr, void* sinkPtrAboutToBeDeleted) {
     if (dynamic_cast<StcpInduct*>(thisInductPtr)) {
+
+    }
+    else if (dynamic_cast<HilinkInduct*>(thisInductPtr)) {
+
+    }
+    else if (dynamic_cast<HilinkTcpInduct*>(thisInductPtr)) {
 
     }
     else {
