@@ -1,0 +1,16 @@
+{
+    "outductConfigName": "myconfig",
+    "outductVector": [
+        {
+            "name": "bpgen",
+            "convergenceLayer": "hilink_tcp",
+            "nextHopNodeId": 10,
+            "remoteHostname": "localhost",
+            "remotePort": 4556,
+            "maxNumberOfBundlesInPipeline": 5,
+            "maxSumOfBundleBytesInPipeline": 50000000,
+            "keepAliveIntervalSeconds": 17,
+            "hilinkHeaderByte": 161
+        }
+    ]
+}

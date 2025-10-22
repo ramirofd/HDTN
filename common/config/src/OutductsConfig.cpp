@@ -519,12 +519,12 @@ bool OutductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree
                 return false;
             }
 
-            if ((outductElementConfig.convergenceLayer == "stcp") || (outductElementConfig.convergenceLayer == "tcpcl_v3") || (outductElementConfig.convergenceLayer == "tcpcl_v4")) {
+            if ((outductElementConfig.convergenceLayer == "stcp") || (outductElementConfig.convergenceLayer == "tcpcl_v3") || (outductElementConfig.convergenceLayer == "tcpcl_v4") || (outductElementConfig.convergenceLayer == "hilink_tcp")) {
                 outductElementConfig.keepAliveIntervalSeconds = outductElementConfigPt.second.get<uint16_t>("keepAliveIntervalSeconds");
             }
             else if (outductElementConfigPt.second.count("keepAliveIntervalSeconds") != 0) {
                 LOG_ERROR(subprocess) << "error parsing JSON outductVector[" << (vectorIndex - 1) << "]: outduct convergence layer  " << outductElementConfig.convergenceLayer
-                    << " has an stcp or tcpcl outduct only configuration parameter of \"keepAliveIntervalSeconds\".. please remove";
+                    << " has an stcp, hilink_tcp, or tcpcl outduct only configuration parameter of \"keepAliveIntervalSeconds\".. please remove";
                 return false;
             }
 

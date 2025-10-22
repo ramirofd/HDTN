@@ -1,0 +1,14 @@
+{
+    "inductConfigName": "myconfig",
+    "inductVector": [
+        {
+            "name": "hilink_tcp_bpsink",
+            "convergenceLayer": "hilink_tcp",
+            "boundPort": 4558,
+            "numRxCircularBufferElements": 2000,
+            "numRxCircularBufferBytesPerElement": 65535,
+            "keepAliveIntervalSeconds": 15,
+            "hilinkHeaderByte": 161
+        }
+    ]
+}
