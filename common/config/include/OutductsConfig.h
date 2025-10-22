@@ -75,7 +75,7 @@ struct outduct_element_config_t {
     std::string comPort;
     uint32_t baudRate;
 
-    //specific to stcp and tcpcl
+    //specific to stcp, hilink_tcp, and tcpcl
     uint16_t keepAliveIntervalSeconds;
 
     //specific to tcpcl version 3 (clients)
