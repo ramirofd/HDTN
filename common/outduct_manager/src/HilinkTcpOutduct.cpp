@@ -16,25 +16,38 @@ std::size_t HilinkTcpOutduct::GetTotalBundlesUnacked() const noexcept {
 }
 
 bool HilinkTcpOutduct::Forward(const uint8_t* bundleData, const std::size_t size, std::vector<uint8_t>&& userData) {
-    const std::size_t encodedSize = size + 2;
+    // [1B header][4B length BE][payload][1B trailer]
+    const std::size_t encodedSize = 1 + 4 + size + 1;
     padded_vector_uint8_t data(encodedSize);
+
     data[0] = m_outductConfig.hilinkHeaderByte;
+
+    uint32_t len = static_cast<uint32_t>(size);
+    data[1] = static_cast<uint8_t>((len >> 24) & 0xFF);
+    data[2] = static_cast<uint8_t>((len >> 16) & 0xFF);
+    data[3] = static_cast<uint8_t>((len >> 8)  & 0xFF);
+    data[4] = static_cast<uint8_t>(len & 0xFF);
+
     if (size > 0) {
-        std::memcpy(data.data() + 1, bundleData, size);
+        std::memcpy(data.data() + 5, bundleData, size);
     }
     data[encodedSize - 1] = m_outductConfig.hilinkTrailerByte;
     return m_stcpBundleSource.Forward(data, std::move(userData));
+
 }
 
 bool HilinkTcpOutduct::Forward(zmq::message_t & movableDataZmq, std::vector<uint8_t>&& userData) {
-    const std::size_t encodedSize = movableDataZmq.size() + 2;
-    zmq::message_t data(encodedSize);
-    uint8_t* ptr = static_cast<uint8_t*>(data.data());
-    ptr[0] = m_outductConfig.hilinkHeaderByte;
-    if (movableDataZmq.size() > 0) {
-        std::memcpy(ptr + 1, movableDataZmq.data(), movableDataZmq.size());
-    }
-    ptr[encodedSize - 1] = m_outductConfig.hilinkTrailerByte;
+    // [1B header][4B length BE][payload][1B trailer]
+    const uint32_t len = static_cast<uint32_t>(movableDataZmq.size());
+    zmq::message_t data(1 + 4 + len + 1);
+    uint8_t* p = static_cast<uint8_t*>(data.data());
+    p[0] = m_outductConfig.hilinkHeaderByte;
+    p[1] = (len >> 24) & 0xFF;
+    p[2] = (len >> 16) & 0xFF;
+    p[3] = (len >> 8)  & 0xFF;
+    p[4] = len & 0xFF;
+    std::memcpy(p + 5, movableDataZmq.data(), len);
+    p[5 + len] = m_outductConfig.hilinkTrailerByte;
     return m_stcpBundleSource.Forward(data, std::move(userData));
 }
 
