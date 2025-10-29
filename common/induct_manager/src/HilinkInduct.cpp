@@ -37,8 +37,8 @@ HilinkInduct::~HilinkInduct() {
 }
 
 void HilinkInduct::HandleHilinkBundle(padded_vector_uint8_t & bundle) {
-    if (bundle.size() < 2) {
-        LOG_ERROR(subprocess) << "received hilink bundle smaller than header+trailer (size=" << bundle.size() << ")";
+    if (bundle.empty()) {
+        LOG_ERROR(subprocess) << "received hilink bundle missing header (size=" << bundle.size() << ")";
         return;
     }
 
@@ -48,14 +48,7 @@ void HilinkInduct::HandleHilinkBundle(padded_vector_uint8_t & bundle) {
         return;
     }
 
-    if (bundle.back() != m_inductConfig.hilinkTrailerByte) {
-        LOG_ERROR(subprocess) << "unexpected hilink trailer byte " << static_cast<int>(bundle.back())
-                              << " expected " << static_cast<int>(m_inductConfig.hilinkTrailerByte);
-        return;
-    }
-
     bundle.erase(bundle.begin()); // remove header byte
-    bundle.pop_back(); // remove trailer byte
     m_inductProcessBundleCallback(bundle);
 }
 

@@ -70,7 +70,6 @@ struct outduct_element_config_t {
 
     //specific to hilink
     uint8_t hilinkHeaderByte;
-    uint8_t hilinkTrailerByte;
 
     //specific to slip over uart
     std::string comPort;

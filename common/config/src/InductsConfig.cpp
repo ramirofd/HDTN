@@ -36,7 +36,6 @@ induct_element_config_t::induct_element_config_t() :
       numRxCircularBufferBytesPerElement(0),
 
       hilinkHeaderByte(0xA0),
-      hilinkTrailerByte(0xA0),
 
       bpEncapLocalSocketOrPipePath(""),
 
@@ -87,7 +86,6 @@ induct_element_config_t::induct_element_config_t(const induct_element_config_t& 
       numRxCircularBufferBytesPerElement(o.numRxCircularBufferBytesPerElement),
 
       hilinkHeaderByte(o.hilinkHeaderByte),
-      hilinkTrailerByte(o.hilinkTrailerByte),
 
       bpEncapLocalSocketOrPipePath(o.bpEncapLocalSocketOrPipePath),
 
@@ -135,7 +133,6 @@ induct_element_config_t::induct_element_config_t(induct_element_config_t&& o) no
       numRxCircularBufferBytesPerElement(o.numRxCircularBufferBytesPerElement),
 
       hilinkHeaderByte(o.hilinkHeaderByte),
-      hilinkTrailerByte(o.hilinkTrailerByte),
 
       bpEncapLocalSocketOrPipePath(std::move(o.bpEncapLocalSocketOrPipePath)),
 
@@ -183,7 +180,6 @@ induct_element_config_t& induct_element_config_t::operator=(const induct_element
       numRxCircularBufferBytesPerElement = o.numRxCircularBufferBytesPerElement;
 
       hilinkHeaderByte = o.hilinkHeaderByte;
-      hilinkTrailerByte = o.hilinkTrailerByte;
 
       bpEncapLocalSocketOrPipePath = o.bpEncapLocalSocketOrPipePath;
 
@@ -233,7 +229,6 @@ induct_element_config_t& induct_element_config_t::operator=(induct_element_confi
       numRxCircularBufferBytesPerElement = o.numRxCircularBufferBytesPerElement;
 
       hilinkHeaderByte = o.hilinkHeaderByte;
-      hilinkTrailerByte = o.hilinkTrailerByte;
 
       bpEncapLocalSocketOrPipePath = std::move(o.bpEncapLocalSocketOrPipePath);
 
@@ -282,7 +277,6 @@ bool induct_element_config_t::operator==(const induct_element_config_t & o) cons
           (numRxCircularBufferBytesPerElement == o.numRxCircularBufferBytesPerElement) &&
 
           (hilinkHeaderByte == o.hilinkHeaderByte) &&
-          (hilinkTrailerByte == o.hilinkTrailerByte) &&
 
           (bpEncapLocalSocketOrPipePath == o.bpEncapLocalSocketOrPipePath) &&
 
@@ -413,20 +407,13 @@ bool InductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree 
               if (isHilinkInduct) {
                   inductElementConfig.hilinkHeaderByte = static_cast<uint8_t>(inductElementConfigPt.second.get<uint16_t>("hilinkHeaderByte"));
                   if (inductElementConfigPt.second.count("hilinkTrailerByte")) {
-                      inductElementConfig.hilinkTrailerByte = static_cast<uint8_t>(inductElementConfigPt.second.get<uint16_t>("hilinkTrailerByte"));
-                  }
-                  else {
-                      inductElementConfig.hilinkTrailerByte = inductElementConfig.hilinkHeaderByte;
+                      LOG_ERROR(subprocess) << "error parsing JSON inductVector[" << (vectorIndex - 1) << "]: hilink convergence layer configuration parameter \"hilinkTrailerByte\" is no longer supported";
+                      return false;
                   }
               }
               else if (inductElementConfigPt.second.count("hilinkHeaderByte") != 0) {
                   LOG_ERROR(subprocess) << "error parsing JSON inductVector[" << (vectorIndex - 1) << "]: induct convergence layer  "
                       << inductElementConfig.convergenceLayer << " has a hilink induct only configuration parameter of \"hilinkHeaderByte\".. please remove";
-                  return false;
-              }
-              else if (inductElementConfigPt.second.count("hilinkTrailerByte") != 0) {
-                  LOG_ERROR(subprocess) << "error parsing JSON inductVector[" << (vectorIndex - 1) << "]: induct convergence layer  "
-                      << inductElementConfig.convergenceLayer << " has a hilink induct only configuration parameter of \"hilinkTrailerByte\".. please remove";
                   return false;
               }
 
@@ -648,7 +635,6 @@ boost::property_tree::ptree InductsConfig::GetNewPropertyTree() const {
         }
         if ((inductElementConfig.convergenceLayer == "hilink") || (inductElementConfig.convergenceLayer == "hilink_tcp")) {
             inductElementConfigPt.put("hilinkHeaderByte", inductElementConfig.hilinkHeaderByte);
-            inductElementConfigPt.put("hilinkTrailerByte", inductElementConfig.hilinkTrailerByte);
         }
         if ((inductElementConfig.convergenceLayer == "ltp_over_udp")
             || (inductElementConfig.convergenceLayer == "ltp_over_ipc")

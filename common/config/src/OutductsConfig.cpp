@@ -63,7 +63,6 @@ outduct_element_config_t::outduct_element_config_t() :
       rateLimitPrecisionMicroSec(DEFAULT_RATE_LIMIT_PRECISION),
 
       hilinkHeaderByte(0xA0),
-      hilinkTrailerByte(0xA0),
 
       comPort(""),
       baudRate(115200),
@@ -116,7 +115,6 @@ outduct_element_config_t::outduct_element_config_t(const outduct_element_config_
       rateLimitPrecisionMicroSec(o.rateLimitPrecisionMicroSec),
 
       hilinkHeaderByte(o.hilinkHeaderByte),
-      hilinkTrailerByte(o.hilinkTrailerByte),
 
       comPort(o.comPort),
       baudRate(o.baudRate),
@@ -166,7 +164,6 @@ outduct_element_config_t::outduct_element_config_t(outduct_element_config_t&& o)
       rateLimitPrecisionMicroSec(o.rateLimitPrecisionMicroSec),
 
       hilinkHeaderByte(o.hilinkHeaderByte),
-      hilinkTrailerByte(o.hilinkTrailerByte),
 
       comPort(std::move(o.comPort)),
       baudRate(o.baudRate),
@@ -216,7 +213,6 @@ outduct_element_config_t& outduct_element_config_t::operator=(const outduct_elem
       rateLimitPrecisionMicroSec = o.rateLimitPrecisionMicroSec;
 
       hilinkHeaderByte = o.hilinkHeaderByte;
-      hilinkTrailerByte = o.hilinkTrailerByte;
 
       comPort = o.comPort;
       baudRate = o.baudRate;
@@ -269,7 +265,6 @@ outduct_element_config_t& outduct_element_config_t::operator=(outduct_element_co
       rateLimitPrecisionMicroSec = o.rateLimitPrecisionMicroSec;
 
       hilinkHeaderByte = o.hilinkHeaderByte;
-      hilinkTrailerByte = o.hilinkTrailerByte;
 
       comPort = std::move(o.comPort);
       baudRate = o.baudRate;
@@ -321,7 +316,6 @@ bool outduct_element_config_t::operator==(const outduct_element_config_t & o) co
           (rateLimitPrecisionMicroSec == o.rateLimitPrecisionMicroSec) &&
 
           (hilinkHeaderByte == o.hilinkHeaderByte) &&
-          (hilinkTrailerByte == o.hilinkTrailerByte) &&
 
           (comPort == o.comPort) &&
           (baudRate == o.baudRate) &&
@@ -426,20 +420,13 @@ bool OutductsConfig::SetValuesFromPropertyTree(const boost::property_tree::ptree
               if (isHilinkOutduct) {
                   outductElementConfig.hilinkHeaderByte = static_cast<uint8_t>(outductElementConfigPt.second.get<uint16_t>("hilinkHeaderByte"));
                   if (outductElementConfigPt.second.count("hilinkTrailerByte")) {
-                      outductElementConfig.hilinkTrailerByte = static_cast<uint8_t>(outductElementConfigPt.second.get<uint16_t>("hilinkTrailerByte"));
-                  }
-                  else {
-                      outductElementConfig.hilinkTrailerByte = outductElementConfig.hilinkHeaderByte;
+                      LOG_ERROR(subprocess) << "error parsing JSON outductVector[" << (vectorIndex - 1) << "]: hilink convergence layer configuration parameter \"hilinkTrailerByte\" is no longer supported";
+                      return false;
                   }
               }
               else if (outductElementConfigPt.second.count("hilinkHeaderByte") != 0) {
                   LOG_ERROR(subprocess) << "error parsing JSON outductVector[" << (vectorIndex - 1) << "]: outduct convergence layer  "
                       << outductElementConfig.convergenceLayer << " has a hilink outduct only configuration parameter of \"hilinkHeaderByte\".. please remove";
-                  return false;
-              }
-              else if (outductElementConfigPt.second.count("hilinkTrailerByte") != 0) {
-                  LOG_ERROR(subprocess) << "error parsing JSON outductVector[" << (vectorIndex - 1) << "]: outduct convergence layer  "
-                      << outductElementConfig.convergenceLayer << " has a hilink outduct only configuration parameter of \"hilinkTrailerByte\".. please remove";
                   return false;
               }
 
@@ -663,10 +650,9 @@ boost::property_tree::ptree OutductsConfig::GetNewPropertyTree() const {
         outductElementConfigPt.put("maxNumberOfBundlesInPipeline", outductElementConfig.maxNumberOfBundlesInPipeline);
           outductElementConfigPt.put("maxSumOfBundleBytesInPipeline", outductElementConfig.maxSumOfBundleBytesInPipeline);
 
-          if ((outductElementConfig.convergenceLayer == "hilink") || (outductElementConfig.convergenceLayer == "hilink_tcp")) {
-              outductElementConfigPt.put("hilinkHeaderByte", outductElementConfig.hilinkHeaderByte);
-              outductElementConfigPt.put("hilinkTrailerByte", outductElementConfig.hilinkTrailerByte);
-          }
+        if ((outductElementConfig.convergenceLayer == "hilink") || (outductElementConfig.convergenceLayer == "hilink_tcp")) {
+            outductElementConfigPt.put("hilinkHeaderByte", outductElementConfig.hilinkHeaderByte);
+        }
         
         if ((outductElementConfig.convergenceLayer == "ltp_over_udp")
             || (outductElementConfig.convergenceLayer == "ltp_over_ipc")

@@ -93,8 +93,8 @@ void HilinkTcpInduct::HandleTcpAccept(std::shared_ptr<boost::asio::ip::tcp::sock
 }
 
 void HilinkTcpInduct::HandleHilinkBundle(padded_vector_uint8_t & bundle) {
-    if (bundle.size() < 2) {
-        LOG_ERROR(subprocess) << "received hilink tcp bundle smaller than header+trailer (size=" << bundle.size() << ")";
+    if (bundle.size() < 5) {
+        LOG_ERROR(subprocess) << "received hilink tcp bundle smaller than header+length (size=" << bundle.size() << ")";
         return;
     }
 
@@ -104,14 +104,7 @@ void HilinkTcpInduct::HandleHilinkBundle(padded_vector_uint8_t & bundle) {
         return;
     }
 
-    if (bundle.back() != m_inductConfig.hilinkTrailerByte) {
-        LOG_ERROR(subprocess) << "unexpected hilink trailer byte " << static_cast<int>(bundle.back())
-                              << " expected " << static_cast<int>(m_inductConfig.hilinkTrailerByte);
-        return;
-    }
-
     bundle.erase(bundle.begin());
-    bundle.pop_back();
     m_inductProcessBundleCallback(bundle);
 }
 

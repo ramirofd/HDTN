@@ -42,7 +42,6 @@ struct induct_element_config_t {
 
     //specific to hilink
     uint8_t hilinkHeaderByte;
-    uint8_t hilinkTrailerByte;
 
     //specific to bp over encap
     std::string bpEncapLocalSocketOrPipePath;
