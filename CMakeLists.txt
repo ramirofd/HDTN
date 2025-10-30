@@ -152,7 +152,7 @@ endif()
 
 
 if((CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")) #apple m2 (arm64) or linux arm64 (aarch64)
-	OPTION(USE_X86_HARDWARE_ACCELERATION "Use ARM CPU NEON instructions (translated from x86 to ARM through CMake-downloaded sse2neon.h header-only library)" ON)
+	OPTION(USE_X86_HARDWARE_ACCELERATION "Use ARM CPU NEON instructions (translated from x86 to ARM through CMake-downloaded sse2neon.h header-only library)" OFF)
 	OPTION(LTP_RNG_USE_RDSEED "NOT SUPPORTED ON ARM - Use CPU RDSEED instruction as a source of randomness for LTP Random Number Generator" OFF)
 	if(LTP_RNG_USE_RDSEED)
 		message(FATAL_ERROR "LTP_RNG_USE_RDSEED is set to ON in the CMakeCache.txt.  It must be turned off on ARM CPUs")
