@@ -42,9 +42,10 @@ target_link_libraries(induct_manager_lib
 	PUBLIC
 		hdtn_util
 		config_lib
-		tcpcl_lib 
-		stcp_lib 
-		udp_lib 
+                tcpcl_lib
+                stcp_lib
+                hilink_lib
+                udp_lib
 		slip_over_uart_lib
 		ltp_lib
 		log_lib

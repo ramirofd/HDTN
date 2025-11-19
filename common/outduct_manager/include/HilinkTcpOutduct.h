@@ -3,8 +3,7 @@
 
 #include <string>
 #include "Outduct.h"
-#include "StcpBundleSource.h"
-#include <list>
+#include "HilinkTcpBundleSource.h"
 
 class CLASS_VISIBILITY_OUTDUCT_MANAGER_LIB HilinkTcpOutduct : public Outduct {
 public:
@@ -30,7 +29,7 @@ public:
 private:
     HilinkTcpOutduct();
 
-    StcpBundleSource m_stcpBundleSource;
+    HilinkTcpBundleSource m_hilinkTcpBundleSource;
 };
 
 #endif // HILINK_TCP_OUTDUCT_H
