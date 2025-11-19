@@ -42,9 +42,10 @@ target_link_libraries(outduct_manager_lib
 	PUBLIC
 		hdtn_util
 		config_lib
-		tcpcl_lib 
-		stcp_lib 
-		udp_lib 
+                tcpcl_lib
+                stcp_lib
+                hilink_lib
+                udp_lib
 		ltp_lib
 		slip_over_uart_lib
 		bpcodec

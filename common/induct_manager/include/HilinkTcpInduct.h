@@ -3,7 +3,7 @@
 
 #include <string>
 #include "Induct.h"
-#include "StcpBundleSink.h"
+#include "HilinkTcpBundleSink.h"
 #include <list>
 #include <memory>
 #include <atomic>
@@ -21,7 +21,6 @@ private:
     INDUCT_MANAGER_LIB_EXPORT HilinkTcpInduct();
     INDUCT_MANAGER_LIB_EXPORT void StartTcpAccept();
     INDUCT_MANAGER_LIB_EXPORT void HandleTcpAccept(std::shared_ptr<boost::asio::ip::tcp::socket> & newTcpSocketPtr, const boost::system::error_code& error);
-    INDUCT_MANAGER_LIB_EXPORT void HandleHilinkBundle(padded_vector_uint8_t & bundle);
     INDUCT_MANAGER_LIB_EXPORT void ConnectionReadyToBeDeletedNotificationReceived();
     INDUCT_MANAGER_LIB_EXPORT void RemoveInactiveTcpConnections();
     INDUCT_MANAGER_LIB_EXPORT void DisableRemoveInactiveTcpConnections();
@@ -30,8 +29,8 @@ private:
     boost::asio::ip::tcp::acceptor m_tcpAcceptor;
     std::unique_ptr<boost::asio::io_service::work> m_workPtr;
     std::unique_ptr<boost::thread> m_ioServiceThreadPtr;
-    std::list<StcpBundleSink> m_listStcpBundleSinks;
-    boost::mutex m_listStcpBundleSinksMutex;
+    std::list<HilinkTcpBundleSink> m_listHilinkTcpBundleSinks;
+    boost::mutex m_listHilinkTcpBundleSinksMutex;
     std::atomic<bool> m_allowRemoveInactiveTcpConnections;
     const uint64_t M_MAX_BUNDLE_SIZE_BYTES;
 };

@@ -2,81 +2,64 @@
 #include <boost/make_unique.hpp>
 #include <memory>
 #include <boost/lexical_cast.hpp>
-#include <cstring>
 
 HilinkTcpOutduct::HilinkTcpOutduct(const outduct_element_config_t & outductConfig, const uint64_t outductUuid) :
     Outduct(outductConfig, outductUuid),
-    m_stcpBundleSource(outductConfig.keepAliveIntervalSeconds, outductConfig.maxNumberOfBundlesInPipeline + 5)
+    m_hilinkTcpBundleSource(outductConfig.hilinkHeaderByte, outductConfig.hilinkTrailerByte,
+        outductConfig.keepAliveIntervalSeconds, outductConfig.maxNumberOfBundlesInPipeline + 5)
 {}
 
 HilinkTcpOutduct::~HilinkTcpOutduct() {}
 
 std::size_t HilinkTcpOutduct::GetTotalBundlesUnacked() const noexcept {
-    return m_stcpBundleSource.GetTotalBundlesUnacked();
+    return m_hilinkTcpBundleSource.GetTotalBundlesUnacked();
 }
 
 bool HilinkTcpOutduct::Forward(const uint8_t* bundleData, const std::size_t size, std::vector<uint8_t>&& userData) {
-    const std::size_t encodedSize = size + 2;
-    padded_vector_uint8_t data(encodedSize);
-    data[0] = m_outductConfig.hilinkHeaderByte;
-    if (size > 0) {
-        std::memcpy(data.data() + 1, bundleData, size);
-    }
-    data[encodedSize - 1] = m_outductConfig.hilinkTrailerByte;
-    return m_stcpBundleSource.Forward(data, std::move(userData));
+    return m_hilinkTcpBundleSource.Forward(bundleData, size, std::move(userData));
 }
 
 bool HilinkTcpOutduct::Forward(zmq::message_t & movableDataZmq, std::vector<uint8_t>&& userData) {
-    const std::size_t encodedSize = movableDataZmq.size() + 2;
-    zmq::message_t data(encodedSize);
-    uint8_t* ptr = static_cast<uint8_t*>(data.data());
-    ptr[0] = m_outductConfig.hilinkHeaderByte;
-    if (movableDataZmq.size() > 0) {
-        std::memcpy(ptr + 1, movableDataZmq.data(), movableDataZmq.size());
-    }
-    ptr[encodedSize - 1] = m_outductConfig.hilinkTrailerByte;
-    return m_stcpBundleSource.Forward(data, std::move(userData));
+    return m_hilinkTcpBundleSource.Forward(movableDataZmq, std::move(userData));
 }
 
 bool HilinkTcpOutduct::Forward(padded_vector_uint8_t& movableDataVec, std::vector<uint8_t>&& userData) {
-    movableDataVec.insert(movableDataVec.begin(), m_outductConfig.hilinkHeaderByte);
-    movableDataVec.push_back(m_outductConfig.hilinkTrailerByte);
-    return m_stcpBundleSource.Forward(movableDataVec, std::move(userData));
+    return m_hilinkTcpBundleSource.Forward(movableDataVec, std::move(userData));
 }
 
 void HilinkTcpOutduct::SetOnFailedBundleVecSendCallback(const OnFailedBundleVecSendCallback_t& callback) {
-    m_stcpBundleSource.SetOnFailedBundleVecSendCallback(callback);
+    m_hilinkTcpBundleSource.SetOnFailedBundleVecSendCallback(callback);
 }
 void HilinkTcpOutduct::SetOnFailedBundleZmqSendCallback(const OnFailedBundleZmqSendCallback_t& callback) {
-    m_stcpBundleSource.SetOnFailedBundleZmqSendCallback(callback);
+    m_hilinkTcpBundleSource.SetOnFailedBundleZmqSendCallback(callback);
 }
 void HilinkTcpOutduct::SetOnSuccessfulBundleSendCallback(const OnSuccessfulBundleSendCallback_t& callback) {
-    m_stcpBundleSource.SetOnSuccessfulBundleSendCallback(callback);
+    m_hilinkTcpBundleSource.SetOnSuccessfulBundleSendCallback(callback);
 }
 void HilinkTcpOutduct::SetOnOutductLinkStatusChangedCallback(const OnOutductLinkStatusChangedCallback_t& callback) {
-    m_stcpBundleSource.SetOnOutductLinkStatusChangedCallback(callback);
+    m_hilinkTcpBundleSource.SetOnOutductLinkStatusChangedCallback(callback);
 }
 void HilinkTcpOutduct::SetUserAssignedUuid(uint64_t userAssignedUuid) {
-    m_stcpBundleSource.SetUserAssignedUuid(userAssignedUuid);
+    m_hilinkTcpBundleSource.SetUserAssignedUuid(userAssignedUuid);
 }
 
 void HilinkTcpOutduct::Connect() {
-    m_stcpBundleSource.Connect(m_outductConfig.remoteHostname, boost::lexical_cast<std::string>(m_outductConfig.remotePort));
+    m_hilinkTcpBundleSource.Connect(m_outductConfig.remoteHostname, boost::lexical_cast<std::string>(m_outductConfig.remotePort));
 }
 bool HilinkTcpOutduct::ReadyToForward() {
-    return m_stcpBundleSource.ReadyToForward();
+    return m_hilinkTcpBundleSource.ReadyToForward();
 }
 void HilinkTcpOutduct::Stop() {
-    m_stcpBundleSource.Stop();
+    m_hilinkTcpBundleSource.Stop();
 }
 void HilinkTcpOutduct::GetOutductFinalStats(OutductFinalStats & finalStats) {
     finalStats.m_convergenceLayer = m_outductConfig.convergenceLayer;
-    finalStats.m_totalBundlesAcked = m_stcpBundleSource.GetTotalBundlesAcked();
-    finalStats.m_totalBundlesSent = m_stcpBundleSource.GetTotalBundlesSent();
+    finalStats.m_totalBundlesAcked = m_hilinkTcpBundleSource.GetTotalBundlesAcked();
+    finalStats.m_totalBundlesSent = m_hilinkTcpBundleSource.GetTotalBundlesSent();
 }
 void HilinkTcpOutduct::PopulateOutductTelemetry(std::unique_ptr<OutductTelemetry_t>& outductTelem) {
     std::unique_ptr<StcpOutductTelemetry_t> t = boost::make_unique<StcpOutductTelemetry_t>();
-    m_stcpBundleSource.GetTelemetry(*t);
+    m_hilinkTcpBundleSource.GetTelemetry(*t);
     outductTelem = std::move(t);
     outductTelem->m_linkIsUpPerTimeSchedule = m_linkIsUpPerTimeSchedule;
 }

@@ -7,8 +7,6 @@
 #include <boost/lexical_cast.hpp>
 #include "ThreadNamer.h"
 
-using boost::placeholders::_1;
-
 static constexpr hdtn::Logger::SubProcess subprocess = hdtn::Logger::SubProcess::none;
 
 HilinkTcpInduct::HilinkTcpInduct(const InductProcessBundleCallback_t & inductProcessBundleCallback,
@@ -48,7 +46,7 @@ HilinkTcpInduct::~HilinkTcpInduct() {
         catch (const boost::condition_error&) {}
         catch (const boost::lock_error&) {}
     }
-    m_listStcpBundleSinks.clear();
+    m_listHilinkTcpBundleSinks.clear();
     m_workPtr.reset();
 
     if (m_ioServiceThreadPtr) {
@@ -74,15 +72,16 @@ void HilinkTcpInduct::HandleTcpAccept(std::shared_ptr<boost::asio::ip::tcp::sock
     if (!error) {
         LOG_INFO(subprocess) << "hilink tcp connection: " << newTcpSocketPtr->remote_endpoint().address() << ":" << newTcpSocketPtr->remote_endpoint().port();
         {
-            boost::mutex::scoped_lock lock(m_listStcpBundleSinksMutex);
-            m_listStcpBundleSinks.emplace_back(newTcpSocketPtr, m_ioService,
-                boost::bind(&HilinkTcpInduct::HandleHilinkBundle, this, _1),
+            boost::mutex::scoped_lock lock(m_listHilinkTcpBundleSinksMutex);
+            m_listHilinkTcpBundleSinks.emplace_back(newTcpSocketPtr, m_ioService,
+                m_inductConfig.hilinkHeaderByte, m_inductConfig.hilinkTrailerByte,
+                m_inductProcessBundleCallback,
                 m_inductConfig.numRxCircularBufferElements,
                 M_MAX_BUNDLE_SIZE_BYTES,
                 boost::bind(&HilinkTcpInduct::ConnectionReadyToBeDeletedNotificationReceived, this));
         }
         if (m_onNewOpportunisticLinkCallback) {
-            m_onNewOpportunisticLinkCallback(0, this, &m_listStcpBundleSinks.back());
+            m_onNewOpportunisticLinkCallback(0, this, &m_listHilinkTcpBundleSinks.back());
         }
 
         StartTcpAccept();
@@ -92,34 +91,11 @@ void HilinkTcpInduct::HandleTcpAccept(std::shared_ptr<boost::asio::ip::tcp::sock
     }
 }
 
-void HilinkTcpInduct::HandleHilinkBundle(padded_vector_uint8_t & bundle) {
-    if (bundle.size() < 2) {
-        LOG_ERROR(subprocess) << "received hilink tcp bundle smaller than header+trailer (size=" << bundle.size() << ")";
-        return;
-    }
-
-    if (bundle.front() != m_inductConfig.hilinkHeaderByte) {
-        LOG_ERROR(subprocess) << "unexpected hilink header byte " << static_cast<int>(bundle.front())
-                              << " expected " << static_cast<int>(m_inductConfig.hilinkHeaderByte);
-        return;
-    }
-
-    if (bundle.back() != m_inductConfig.hilinkTrailerByte) {
-        LOG_ERROR(subprocess) << "unexpected hilink trailer byte " << static_cast<int>(bundle.back())
-                              << " expected " << static_cast<int>(m_inductConfig.hilinkTrailerByte);
-        return;
-    }
-
-    bundle.erase(bundle.begin());
-    bundle.pop_back();
-    m_inductProcessBundleCallback(bundle);
-}
-
 void HilinkTcpInduct::RemoveInactiveTcpConnections() {
     const OnDeletedOpportunisticLinkCallback_t& callbackRef = m_onDeletedOpportunisticLinkCallback;
     if (m_allowRemoveInactiveTcpConnections.load(std::memory_order_acquire)) {
-        boost::mutex::scoped_lock lock(m_listStcpBundleSinksMutex);
-        m_listStcpBundleSinks.remove_if([&callbackRef, this](StcpBundleSink& sink) {
+        boost::mutex::scoped_lock lock(m_listHilinkTcpBundleSinksMutex);
+        m_listHilinkTcpBundleSinks.remove_if([&callbackRef, this](HilinkTcpBundleSink& sink) {
             if (sink.ReadyToBeDeleted()) {
                 if (callbackRef) {
                     callbackRef(0, this, &sink);
@@ -145,8 +121,8 @@ void HilinkTcpInduct::PopulateInductTelemetry(InductTelemetry_t& inductTelem) {
     inductTelem.m_convergenceLayer = "hilink_tcp";
     inductTelem.m_listInductConnections.clear();
     {
-        boost::mutex::scoped_lock lock(m_listStcpBundleSinksMutex);
-        for (std::list<StcpBundleSink>::const_iterator it = m_listStcpBundleSinks.cbegin(); it != m_listStcpBundleSinks.cend(); ++it) {
+        boost::mutex::scoped_lock lock(m_listHilinkTcpBundleSinksMutex);
+        for (std::list<HilinkTcpBundleSink>::const_iterator it = m_listHilinkTcpBundleSinks.cbegin(); it != m_listHilinkTcpBundleSinks.cend(); ++it) {
             std::unique_ptr<StcpInductConnectionTelemetry_t> t = boost::make_unique<StcpInductConnectionTelemetry_t>();
             it->GetTelemetry(*t);
             inductTelem.m_listInductConnections.emplace_back(std::move(t));
