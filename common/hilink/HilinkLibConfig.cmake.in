@@ -1,0 +1,11 @@
+get_filename_component(HILINKLIB_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+include(CMakeFindDependencyMacro)
+
+find_dependency(StcpLib REQUIRED)
+find_dependency(LoggerLib REQUIRED)
+
+if(NOT TARGET HDTN::HilinkLib)
+    include("${HILINKLIB_CMAKE_DIR}/HilinkLibTargets.cmake")
+endif()
+
+set(HILINKLIB_LIBRARIES HDTN::HilinkLib)
