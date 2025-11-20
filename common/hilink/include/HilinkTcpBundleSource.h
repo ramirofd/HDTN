@@ -21,10 +21,10 @@ public:
     HILINK_LIB_EXPORT bool Forward(zmq::message_t & movableDataZmq, std::vector<uint8_t>&& userData);
     HILINK_LIB_EXPORT bool Forward(padded_vector_uint8_t& movableDataVec, std::vector<uint8_t>&& userData);
 
-    HILINK_LIB_EXPORT void SetOnFailedBundleVecSendCallback(const StcpBundleSource::OnFailedBundleVecSendCallback_t& callback);
-    HILINK_LIB_EXPORT void SetOnFailedBundleZmqSendCallback(const StcpBundleSource::OnFailedBundleZmqSendCallback_t& callback);
-    HILINK_LIB_EXPORT void SetOnSuccessfulBundleSendCallback(const StcpBundleSource::OnSuccessfulBundleSendCallback_t& callback);
-    HILINK_LIB_EXPORT void SetOnOutductLinkStatusChangedCallback(const StcpBundleSource::OnOutductLinkStatusChangedCallback_t& callback);
+    HILINK_LIB_EXPORT void SetOnFailedBundleVecSendCallback(const OnFailedBundleVecSendCallback_t& callback);
+    HILINK_LIB_EXPORT void SetOnFailedBundleZmqSendCallback(const OnFailedBundleZmqSendCallback_t& callback);
+    HILINK_LIB_EXPORT void SetOnSuccessfulBundleSendCallback(const OnSuccessfulBundleSendCallback_t& callback);
+    HILINK_LIB_EXPORT void SetOnOutductLinkStatusChangedCallback(const OnOutductLinkStatusChangedCallback_t& callback);
     HILINK_LIB_EXPORT void SetUserAssignedUuid(uint64_t userAssignedUuid);
 
     HILINK_LIB_EXPORT void Connect(const std::string & hostname, const std::string & port);

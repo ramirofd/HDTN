@@ -42,19 +42,19 @@ bool HilinkTcpBundleSource::ForwardVector(padded_vector_uint8_t& data, std::vect
     return m_stcpBundleSource.Forward(data, std::move(userData));
 }
 
-void HilinkTcpBundleSource::SetOnFailedBundleVecSendCallback(const StcpBundleSource::OnFailedBundleVecSendCallback_t& callback) {
+void HilinkTcpBundleSource::SetOnFailedBundleVecSendCallback(const OnFailedBundleVecSendCallback_t& callback) {
     m_stcpBundleSource.SetOnFailedBundleVecSendCallback(callback);
 }
 
-void HilinkTcpBundleSource::SetOnFailedBundleZmqSendCallback(const StcpBundleSource::OnFailedBundleZmqSendCallback_t& callback) {
+void HilinkTcpBundleSource::SetOnFailedBundleZmqSendCallback(const OnFailedBundleZmqSendCallback_t& callback) {
     m_stcpBundleSource.SetOnFailedBundleZmqSendCallback(callback);
 }
 
-void HilinkTcpBundleSource::SetOnSuccessfulBundleSendCallback(const StcpBundleSource::OnSuccessfulBundleSendCallback_t& callback) {
+void HilinkTcpBundleSource::SetOnSuccessfulBundleSendCallback(const OnSuccessfulBundleSendCallback_t& callback) {
     m_stcpBundleSource.SetOnSuccessfulBundleSendCallback(callback);
 }
 
-void HilinkTcpBundleSource::SetOnOutductLinkStatusChangedCallback(const StcpBundleSource::OnOutductLinkStatusChangedCallback_t& callback) {
+void HilinkTcpBundleSource::SetOnOutductLinkStatusChangedCallback(const OnOutductLinkStatusChangedCallback_t& callback) {
     m_stcpBundleSource.SetOnOutductLinkStatusChangedCallback(callback);
 }
 
